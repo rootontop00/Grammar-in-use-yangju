@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>English Dialogue Listening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #f5f0e8;
+    --card:     #fffcf5;
+    --border:   #e2d9c8;
+    --accent:   #2563eb;
+    --accent2:  #f97316;
+    --green:    #16a34a;
+    --purple:   #7c3aed;
+    --pink:     #db2777;
+    --text:     #1a1a1a;
+    --muted:    #6b7280;
+    --light:    #9ca3af;
+    --shadow:   rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 60px;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    background: var(--accent);
+    padding: 20px 24px 18px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -20px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .header-title {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.01em;
+    position: relative;
+    z-index: 1;
+  }
+  .header-sub {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Loading / Error state */
+  .status-box {
+    margin-top: 60px;
+    text-align: center;
+    padding: 24px;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status-msg { font-size: 0.9rem; color: var(--muted); font-weight: 600; }
+  .error-msg { color: #dc2626; font-size: 0.85rem; margin-top: 8px; line-height: 1.5; }
+
+  /* Main content */
+  .main { width: 100%; max-width: 540px; padding: 24px 16px 0; }
+
+  /* Lesson info bar */
+  .lesson-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .lesson-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .lesson-date {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 600;
+    background: var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* Slide card */
+  .slide { display: none; animation: fadeUp 0.3s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .scene-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px 20px;
+    box-shadow: 0 4px 20px var(--shadow);
+    position: relative;
+  }
+  .scene-badge {
+    position: absolute;
+    top: -12px; left: 20px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Dialogue */
+  .dialogue { margin-bottom: 20px; }
+  .d-line {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .d-line:last-child { margin-bottom: 0; }
+
+  .speaker-tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .speaker-0 { background: #dbeafe; color: #1d4ed8; }
+  .speaker-1 { background: #dcfce7; color: #15803d; }
+  .speaker-2 { background: #fae8ff; color: #9333ea; }
+  .speaker-3 { background: #fce7f3; color: #be185d; }
+  .speaker-4 { background: #ffedd5; color: #c2410c; }
+
+  .d-text {
+    font-size: 1rem;
+    line-height: 1.65;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  /* Audio button row */
+  .audio-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 16px;
+    border-top: 1.5px solid var(--border);
+    margin-top: 4px;
+  }
+  .play-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .play-btn:active { transform: scale(0.93); }
+  .play-btn.playing {
+    background: var(--accent2);
+    box-shadow: 0 4px 14px rgba(249,115,22,0.4);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 4px 14px rgba(249,115,22,0.4); }
+    50%      { box-shadow: 0 4px 24px rgba(249,115,22,0.65); }
+  }
+  .play-btn svg { width: 24px; height: 24px; }
+
+  .audio-info { flex: 1; }
+  .audio-status {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .audio-status.playing-text { color: var(--accent2); }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent2);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s linear;
+  }
+
+  /* Navigation */
+  .nav-area { margin-top: 20px; }
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .nav-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    border: 2px solid var(--accent);
+    background: #fff;
+    color: var(--accent);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn:active { transform: scale(0.97); }
+  .nav-btn:hover { background: var(--accent); color: #fff; }
+  .nav-btn:disabled { opacity: 0.3; pointer-events: none; }
+
+  .page-pill {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 10px 18px;
+    border-radius: 14px;
+    white-space: nowrap;
+  }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 16px;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--accent); transform: scale(1.4); }
+
+  /* Config sheet notice (bottom) */
+  .config-notice {
+    margin-top: 28px;
+    background: #fffbeb;
+    border: 1.5px solid #fcd34d;
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 0.78rem;
+    color: #92400e;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+  .config-notice strong { color: #78350f; }
+  .config-notice a { color: var(--accent); }
+
+  /* Setup screen (shown when SHEET_URL not configured) */
+  .setup-screen {
+    margin: 30px 16px 0;
+    max-width: 540px;
+    width: calc(100% - 32px);
+  }
+  .setup-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    box-shadow: 0 4px 20px var(--shadow);
+  }
+  .setup-card h2 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-title { font-size: 0.88rem; font-weight: 800; color: var(--text); }
+  .step-desc  { font-size: 0.78rem; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .step-code  {
+    font-family: monospace;
+    font-size: 0.75rem;
+    background: #f3f4f6;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    color: #374151;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+
+  /* Responsive */
+  @media (max-width: 400px) {
+    .d-text { font-size: 0.93rem; }
+    .play-btn { width: 50px; height: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">🎧 English Dialogue</div>
+  <div class="header-sub" id="headerSub">Loading...</div>
+</div>
+
+<div id="statusBox" class="status-box">
+  <div class="spinner"></div>
+  <div class="status-msg" id="statusMsg">데이터 불러오는 중...</div>
+  <div class="error-msg" id="errorMsg"></div>
+</div>
+
+<div id="appContent" style="display:none; width:100%;">
+  <div class="main">
+    <div class="lesson-bar">
+      <div class="lesson-title" id="lessonTitle"></div>
+      <div class="lesson-date" id="lessonDate"></div>
+    </div>
+
+    <div id="slidesContainer"></div>
+
+    <div class="nav-area">
+      <div class="nav-row">
+        <button class="nav-btn" id="prevBtn" onclick="changePage(-1)">← 이전</button>
+        <div class="page-pill" id="pageNum">1 / 1</div>
+        <button class="nav-btn" id="nextBtn" onclick="changePage(1)">다음 →</button>
+      </div>
+      <div class="dots" id="dotsRow"></div>
+    </div>
+
+    <div class="config-notice" id="configNotice" style="display:none;">
+      ⚠️ 구글 드라이브 오디오: <strong>공유 → 링크 있는 모든 사용자 보기</strong>로 설정 필요.<br>
+      파일 링크 형식: <code>https://drive.google.com/file/d/<strong>파일ID</strong>/view</code>
+    </div>
+  </div>
+</div>
+
+<div id="setupScreen" style="display:none;">
+  <div class="setup-screen">
+    <div class="setup-card">
+      <h2>⚙️ 처음 설정하기</h2>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">구글 시트 만들기</div>
+          <div class="step-desc">아래 형식으로 시트를 만드세요. 첫 행은 헤더입니다.</div>
+          <div class="step-code">lesson_title | lesson_date | scene_label | speaker | line | audio_url<br>
+Unit 3 대화 | 2025-03-10 | Scene 1 | Amy | Hey Ben! Is this café new? | (구글드라이브링크)<br>
+Unit 3 대화 | 2025-03-10 | Scene 1 | Ben | They opened it last Saturday. | (빈칸 가능)</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">시트 공개 설정</div>
+          <div class="step-desc">파일 → 공유 → <strong>"링크가 있는 모든 사용자"</strong> → 뷰어로 설정</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">index.html 파일에서 SHEET_ID 수정</div>
+          <div class="step-desc">이 파일 상단의 <code>SHEET_ID</code> 값을 구글 시트 URL에서 복사하세요.</div>
+          <div class="step-code">시트 URL 예시:<br>
+https://docs.google.com/spreadsheets/d/<strong>여기가_SHEET_ID</strong>/edit<br><br>
+index.html 15번째 줄:<br>
+const SHEET_ID = '<strong>여기에_붙여넣기</strong>';</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">오디오 시트 열 (audio_url)</div>
+          <div class="step-desc">같은 장면의 오디오는 첫 번째 행에만 입력. 나머지는 비워도 됩니다.<br>구글 드라이브 링크는 공유 설정을 "뷰어" 이상으로 해야 합니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  ★ 여기만 수정하세요 ★
+// ============================================================
+const SHEET_ID = 'https://docs.google.com/spreadsheets/d/19evfogO0FHAIY-HyejIeDTFsVT51CsizC11akpl-bBE/edit?usp=sharing';   // 구글 시트 ID
+const SHEET_NAME = 'Sheet1';             // 시트 탭 이름 (기본: Sheet1)
+// ============================================================
+
+const API_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+let slides = [];
+let current = 0;
+let currentAudio = null;
+let currentBtnIdx = null;
+
+// ── Google Drive URL 변환 ──────────────────────────────────
+function toDirectUrl(url) {
+  if (!url) return '';
+  url = url.trim();
+  // /file/d/ID/view 형식
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  return url;
+}
+
+// ── 시트 데이터 파싱 ──────────────────────────────────────
+function parseSheetData(raw) {
+  // Google gviz JSON에서 앞부분 제거
+  const json = JSON.parse(raw.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
+  const cols = json.table.cols.map(c => c.label.toLowerCase().trim());
+  const rows = json.table.rows.map(r =>
+    r.c.map(cell => (cell && cell.v != null) ? String(cell.v).trim() : '')
+  );
+
+  // 헤더 인덱스
+  const idx = name => cols.indexOf(name);
+  const iTitle  = idx('lesson_title');
+  const iDate   = idx('lesson_date');
+  const iScene  = idx('scene_label');
+  const iSpk    = idx('speaker');
+  const iLine   = idx('line');
+  const iAudio  = idx('audio_url');
+
+  if ([iSpk, iLine].some(i => i === -1)) {
+    throw new Error('시트 헤더 확인: speaker, line 열이 필요합니다.');
+  }
+
+  // 슬라이드별로 그루핑 (scene_label 기준)
+  const sceneMap = new Map();
+  let lessonTitle = '', lessonDate = '';
+
+  rows.forEach(row => {
+    const scene   = iScene >= 0 ? (row[iScene] || 'Scene 1') : 'Scene 1';
+    const speaker = row[iSpk] || '';
+    const line    = row[iLine] || '';
+    const audio   = iAudio >= 0 ? row[iAudio] : '';
+
+    if (!speaker && !line) return; // 빈 행 skip
+
+    if (!lessonTitle && iTitle >= 0) lessonTitle = row[iTitle];
+    if (!lessonDate  && iDate  >= 0) lessonDate  = row[iDate];
+
+    if (!sceneMap.has(scene)) {
+      sceneMap.set(scene, { label: scene, lines: [], audioUrl: '' });
+    }
+    const s = sceneMap.get(scene);
+    if (!s.audioUrl && audio) s.audioUrl = toDirectUrl(audio);
+    s.lines.push({ speaker, text: line });
+  });
+
+  return {
+    lessonTitle: lessonTitle || 'English Dialogue',
+    lessonDate:  lessonDate  || '',
+    slides: [...sceneMap.values()]
+  };
+}
+
+// ── 화자 색상 ─────────────────────────────────────────────
+const speakerColors = {};
+const colorClasses = ['speaker-0','speaker-1','speaker-2','speaker-3','speaker-4'];
+let colorIdx = 0;
+function getSpeakerClass(name) {
+  if (!speakerColors[name]) {
+    speakerColors[name] = colorClasses[colorIdx % colorClasses.length];
+    colorIdx++;
+  }
+  return speakerColors[name];
+}
+
+// ── 슬라이드 렌더링 ──────────────────────────────────────
+function renderSlides(data) {
+  slides = data.slides;
+  document.getElementById('lessonTitle').textContent = data.lessonTitle;
+  document.getElementById('lessonDate').textContent  = data.lessonDate;
+  document.getElementById('headerSub').textContent   = data.lessonTitle;
+
+  const container = document.getElementById('slidesContainer');
+  const dotsRow   = document.getElementById('dotsRow');
+  container.innerHTML = '';
+  dotsRow.innerHTML   = '';
+
+  slides.forEach((slide, i) => {
+    // 슬라이드 div
+    const div = document.createElement('div');
+    div.className = 'slide' + (i === 0 ? ' active' : '');
+    div.id = 'slide-' + i;
+
+    // 대화 HTML
+    const dialogue = slide.lines.map(l => `
+      <div class="d-line">
+        <span class="speaker-tag ${getSpeakerClass(l.speaker)}">${l.speaker}</span>
+        <div class="d-text">${l.text}</div>
+      </div>`).join('');
+
+    div.innerHTML = `
+      <div class="scene-card">
+        <span class="scene-badge">${slide.label}</span>
+        <div class="dialogue">${dialogue}</div>
+        <div class="audio-row">
+          <button class="play-btn" id="btn-${i}" onclick="toggleAudio(${i})">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <div class="audio-info">
+            <div class="audio-status" id="status-${i}">대화 듣기</div>
+            <div class="progress-bar"><div class="progress-fill" id="prog-${i}"></div></div>
+          </div>
+        </div>
+        <audio id="audio-${i}" preload="none"></audio>
+      </div>`;
+
+    container.appendChild(div);
+
+    // dot
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dotsRow.appendChild(dot);
+  });
+
+  updateNav();
+}
+
+// ── 오디오 컨트롤 ────────────────────────────────────────
+function stopAll() {
+  slides.forEach((_, i) => {
+    const a = document.getElementById('audio-' + i);
+    const btn = document.getElementById('btn-' + i);
+    const st  = document.getElementById('status-' + i);
+    const pr  = document.getElementById('prog-' + i);
+    if (a)  { a.pause(); a.currentTime = 0; }
+    if (btn){ btn.classList.remove('playing'); btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'; }
+    if (st) { st.textContent = '대화 듣기'; st.classList.remove('playing-text'); }
+    if (pr) { pr.style.width = '0%'; }
+  });
+  if (currentAudio) { currentAudio.ontimeupdate = null; currentAudio.onended = null; }
+  currentAudio = null; currentBtnIdx = null;
+}
+
+function toggleAudio(idx) {
+  const slide = slides[idx];
+  const audio = document.getElementById('audio-' + idx);
+  const btn   = document.getElementById('btn-' + idx);
+  const st    = document.getElementById('status-' + idx);
+  const pr    = document.getElementById('prog-' + idx);
+
+  if (!slide.audioUrl) {
+    st.textContent = '오디오 없음 (시트에 링크 추가)';
+    setTimeout(() => { st.textContent = '대화 듣기'; }, 2200);
+    return;
+  }
+
+  // 재생 중 → 정지
+  if (!audio.paused) {
+    stopAll(); return;
+  }
+
+  stopAll();
+  audio.src = slide.audioUrl;
+  audio.play().catch(e => {
+    console.error(e);
+    st.textContent = '재생 오류 — 링크/권한 확인';
+    btn.classList.remove('playing');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+    setTimeout(() => { st.textContent = '대화 듣기'; }, 3000);
+  });
+
+  btn.classList.add('playing');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+  st.textContent = '재생 중...';
+  st.classList.add('playing-text');
+  currentAudio = audio; currentBtnIdx = idx;
+
+  audio.ontimeupdate = () => {
+    if (audio.duration) pr.style.width = (audio.currentTime / audio.duration * 100) + '%';
+  };
+  audio.onended = () => {
+    btn.classList.remove('playing');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+    st.textContent = '다시 듣기 ↺';
+    st.classList.remove('playing-text');
+    pr.style.width = '0%';
+  };
+}
+
+// ── 슬라이드 네비게이션 ──────────────────────────────────
+function goTo(idx) {
+  stopAll();
+  document.getElementById('slide-' + current).classList.remove('active');
+  document.querySelectorAll('.dot')[current].classList.remove('active');
+  current = idx;
+  document.getElementById('slide-' + current).classList.add('active');
+  document.querySelectorAll('.dot')[current].classList.add('active');
+  updateNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function changePage(dir) { goTo(current + dir); }
+function updateNav() {
+  document.getElementById('pageNum').textContent = `${current + 1} / ${slides.length}`;
+  document.getElementById('prevBtn').disabled = current === 0;
+  document.getElementById('nextBtn').disabled = current === slides.length - 1;
+}
+
+// ── 초기 로드 ────────────────────────────────────────────
+async function init() {
+  if (SHEET_ID === 'YOUR_SHEET_ID_HERE') {
+    document.getElementById('statusBox').style.display = 'none';
+    document.getElementById('setupScreen').style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.text();
+    const data = parseSheetData(raw);
+
+    document.getElementById('statusBox').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    renderSlides(data);
+
+    // 오디오 링크가 없는 슬라이드가 있으면 안내 표시
+    const hasNoAudio = data.slides.some(s => !s.audioUrl);
+    if (hasNoAudio) document.getElementById('configNotice').style.display = 'block';
+
+  } catch (e) {
+    document.getElementById('statusMsg').textContent = '데이터 로드 실패';
+    document.getElementById('errorMsg').textContent =
+      `오류: ${e.message}\n\n시트 ID와 공개 설정을 확인하세요.\n(파일 → 공유 → 링크가 있는 모든 사용자 → 뷰어)`;
+    document.querySelector('.spinner').style.display = 'none';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
