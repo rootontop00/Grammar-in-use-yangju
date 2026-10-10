@@ -469,6 +469,8 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
           <li>지도는 자음 → 모음 → 글자 → 받침 → 낱말 → 문장 순서로 62단계예요. 한 단계는 3~5분 정도 걸려요.</li>
           <li>장마다 끝에 <b>시험</b>이 있어요. 아주 흐린 글씨로 섞어서 써요. 한 장을 다 깨면 메달을 받아요.</li>
           <li>틀린 글자는 <b>복습</b>에 모여요. 실수 없이 쓰면 복습 목록에서 빠져요.</li>
+          <li>중간에 그만두거나 앱이 꺼져도 획 하나 쓸 때마다 저장돼요. 다음에 <b>하던 곳부터</b>를 누르면 그 글자, 그 획부터 이어서 써요.</li>
+          <li>단계를 마치면 별 3개를 못 받은 글자만 골라 <b>틀린 글자만 다시 쓰기</b>를 할 수 있어요.</li>
           <li><b>자유 연습</b>에서는 단계와 상관없이 음절표 140자, 글자 만들기(모든 글자), 낱말 147개, 문장 18개, 아이 이름을 쓸 수 있어요.</li>
         </ul>
         <h4>획순의 기본 원칙</h4>
@@ -1087,10 +1089,15 @@ function renderHome() {
   $('#todayN').textContent = n; $('#todayGoal').textContent = store.goal;
   $('#todayBar').style.width = `${Math.min(100, (n / store.goal) * 100)}%`;
   renderWeek();
-  const ns = nextStage();
+  const ns = nextStage(), r = store.resume;
   const cb = $('#continueBtn'); cb.innerHTML = '';
-  cb.append(H('div', null, stageDone(ns) ? '다시 하기' : '이어서 하기', H('span', { text: `${ns.id} ${ns.name}` })));
-  cb.onclick = () => openSheet(ns);
+  if (r && r.def && r.def.texts) {
+    cb.append(H('div', null, '하던 곳부터', H('span', { text: `${r.def.title} · ‘${r.def.texts[r.itemIdx] || r.def.texts[0]}’` })));
+    cb.onclick = () => resumeSession();
+  } else {
+    cb.append(H('div', null, stageDone(ns) ? '다시 하기' : '이어서 하기', H('span', { text: `${ns.id} ${ns.name}` })));
+    cb.onclick = () => openSheet(ns);
+  }
   const weak = weakList();
   const rb = $('#reviewBtn'); rb.innerHTML = '';
   rb.append(H('div', null, '복습', H('span', { text: weak.length ? `틀린 글자 ${weak.length}개` : '틀린 글자 없음' })));
@@ -1150,7 +1157,8 @@ function renderRoad(ch, road, ns) {
     if (!open) disc.append(useIcon('i-lock'));
     else if (s.test) disc.append(useIcon('i-trophy'));
     else disc.append(s.id);
-    if (cur) disc.append(H('span', { class: 'flag', text: '여기부터!' }));
+    const inProgress = store.resume && store.resume.def && store.resume.def.stageId === s.id;
+    if (inProgress || cur) disc.append(H('span', { class: 'flag', text: inProgress ? '하던 중' : '여기부터!' }));
     const sub = s.test ? `${s.pick}개 섞어서` : s.items.join(itemType(s.items[0]) === 'jamo' || itemType(s.items[0]) === 'syllable' ? ' ' : ', ');
     road.append(H('button', {
       class: 'node' + (done ? ' done' : '') + (!open ? ' locked' : '') + (cur ? ' cur' : '') + (s.test ? ' test' : ''),
@@ -1174,6 +1182,7 @@ function renderShelf() {
 function openSheet(s) {
   const sh = $('#sheet'); sh.innerHTML = '';
   const best = store.stages[s.id] || 0;
+  const inProg = !!(store.resume && store.resume.def && store.resume.def.stageId === s.id);
   const prev = H('div', { class: 'preview' });
   const list = s.test ? [] : s.items;
   list.forEach((t) => {
@@ -1191,9 +1200,15 @@ function openSheet(s) {
     prev.childNodes.length ? prev : null,
     H('p', { text: desc }),
     best ? H('div', null, H('span', { text: '최고 기록 ' }), miniStars(best)) : null,
-    H('div', { class: 'sheet-actions' },
-      H('button', { class: 'btn', type: 'button', text: '닫기', onclick: closeSheet }),
-      H('button', { class: 'btn primary', type: 'button', text: best ? '다시 하기' : '시작하기', onclick: () => { closeSheet(); startSession(stageSession(s), 'home'); } })));
+    inProg ? H('p', { class: 'tip', text: `지난번에 ‘${store.resume.def.texts[store.resume.itemIdx] || ''}’ 쓰다가 멈췄어요. 거기부터 이어서 써요.` }) : null,
+    inProg
+      ? H('div', { class: 'sheet-actions' },
+        H('button', { class: 'btn', type: 'button', text: '닫기', onclick: closeSheet }),
+        H('button', { class: 'btn', type: 'button', text: '처음부터', onclick: () => { closeSheet(); startSession(stageSession(s), 'home'); } }),
+        H('button', { class: 'btn primary', type: 'button', text: '이어서 하기', onclick: () => { closeSheet(); resumeSession(); } }))
+      : H('div', { class: 'sheet-actions' },
+        H('button', { class: 'btn', type: 'button', text: '닫기', onclick: closeSheet }),
+        H('button', { class: 'btn primary', type: 'button', text: best ? '다시 하기' : '시작하기', onclick: () => { closeSheet(); startSession(stageSession(s), 'home'); } })));
   $('#sheetLayer').hidden = false;
   setTimeout(() => sh.querySelector('.btn.primary').focus({ preventScroll: true }), 30);
 }
@@ -1209,19 +1224,41 @@ function stageSession(s) {
 function reviewSession() { return { title: '틀린 글자 복습', kind: 'review', texts: weakList().slice(0, 6), reps: ['faint', 'ghost'], watch: false }; }
 function freeSession(texts, title) { return { title, kind: 'free', texts }; }
 
-function startSession(def, returnTo) {
+function startSession(def, returnTo, resume) {
   audio();
   st.sess = Object.assign({}, def, { items: def.texts.map((t) => ({ text: t, type: itemType(t) })) });
-  st.sess.results = [];
-  st.sess.before = { total: store.total, day: todayCount(), medals: store.medals.length };
+  st.sess.results = resume && Array.isArray(resume.results) ? resume.results.slice() : [];
+  st.sess.before = resume && resume.before ? Object.assign({}, resume.before, { day: todayCount() }) : { total: store.total, day: todayCount(), medals: store.medals.length };
   st.returnTo = returnTo || 'home';
-  st.itemIdx = 0;
+  st.itemIdx = resume ? Math.min(Math.max(0, resume.itemIdx | 0), st.sess.items.length - 1) : 0;
   $('#sessTitle').textContent = def.title;
   $('#winLayer').hidden = true;
   show('practice');
-  beginItem();
+  beginItem(resume || null);
+  saveResume();
 }
-function beginItem() {
+/* Progress is saved after every stroke, so leaving, closing the app or a crash resumes at the same letter and stroke. */
+function saveResume(ptr) {
+  const s = st.sess;
+  if (!s || s.finished) return;
+  const p = Object.assign({ itemIdx: st.itemIdx, repIdx: st.repIdx, unitIdx: st.unitIdx, strokeIdx: st.mode === 'watch' ? 0 : st.strokeIdx, itemMistakes: st.itemMistakes }, ptr || {});
+  store.resume = Object.assign({
+    def: { title: s.title, kind: s.kind, stageId: s.stage ? s.stage.id : null, texts: s.texts, reps: s.reps || null, watch: s.watch === undefined ? null : s.watch },
+    returnTo: st.returnTo, results: s.results.map((x) => x || 0), before: s.before, savedAt: Date.now(),
+  }, p);
+  save();
+}
+function resumeSession() {
+  const r = store.resume;
+  if (!r || !r.def || !Array.isArray(r.def.texts) || !r.def.texts.length) { store.resume = null; save(); return false; }
+  const def = Object.assign({}, r.def);
+  if (def.watch === null) delete def.watch;
+  if (def.reps === null) delete def.reps;
+  if (def.stageId) { def.stage = STAGES.find((x) => x.id === def.stageId); if (!def.stage) delete def.stage; }
+  startSession(def, r.returnTo, r);
+  return true;
+}
+function beginItem(resume) {
   const item = curItem();
   st.units = []; st.display = [];
   if (item.type === 'jamo') st.units = [makeUnit(item.text, 'jamo')];
@@ -1231,14 +1268,22 @@ function beginItem() {
   }
   st.repIdx = 0; st.itemMistakes = 0; st.unitIdx = 0;
   renderItems();
+  if (resume) {
+    st.repIdx = Math.min(Math.max(0, resume.repIdx | 0), curReps().length - 1);
+    st.itemMistakes = resume.itemMistakes | 0;
+    const ui = Math.min(Math.max(0, resume.unitIdx | 0), st.units.length - 1), sk = Math.max(0, resume.strokeIdx | 0);
+    startRound({ unitIdx: ui, strokeIdx: sk < st.units[ui].strokes.length ? sk : 0 });
+    return;
+  }
   const watch = st.sess.watch !== undefined ? st.sess.watch : (item.type === 'jamo' || item.type === 'syllable');
   if (watch) startWatch(() => startRound()); else startRound();
 }
-function startRound() {
+function startRound(at) {
   animToken++; st.animating = false; st.busy = false;
-  st.mode = curReps()[st.repIdx]; st.unitIdx = 0; st.strokeIdx = 0; st.hint = false; st.missStreak = 0;
+  st.mode = curReps()[st.repIdx]; st.unitIdx = at ? at.unitIdx : 0; st.strokeIdx = at ? at.strokeIdx : 0; st.hint = false; st.missStreak = 0;
   renderUnit(); renderPips();
-  setMsg(roundMsg());
+  setMsg(at ? `지난번에 멈춘 곳부터 이어서 써요!${st.mode === 'trace' ? ` 반짝이는 ${st.strokeIdx + 1}번 점에서 시작해요.` : ''}` : roundMsg());
+  saveResume();
 }
 function roundMsg() {
   if (st.mode === 'trace') return '반짝이는 1번 점에서 시작해서 화살표 쪽으로 그어요.';
@@ -1431,7 +1476,7 @@ function replayWatch() {
   const mode = st.mode === 'watch' ? curReps()[st.repIdx] : st.mode;
   const item = curItem();
   say(item.type === 'jamo' ? jamoName(item.text) : unit().label);
-  startWatch(() => { st.mode = mode; st.strokeIdx = 0; st.hint = false; st.busy = false; renderUnit(); renderPips(); setMsg(roundMsg()); });
+  startWatch(() => { st.mode = mode; st.strokeIdx = 0; st.hint = false; st.busy = false; renderUnit(); renderPips(); setMsg(roundMsg()); saveResume(); });
 }
 
 /* ---------- judging a drawn stroke ---------- */
@@ -1534,6 +1579,7 @@ function handleStroke(d) {
     sfxGood(idx);
     st.strokeIdx++; st.missStreak = 0; st.hint = false;
     if (st.strokeIdx >= U.strokes.length) { layers.hint.innerHTML = ''; unitDone(); return; }
+    saveResume();
     showHint();
     if (st.mode === 'trace') setMsg(`${pick(GOOD)} 이제 ${st.strokeIdx + 1}번 획이에요.`, 'good');
     else setMsg(`${pick(GOOD)} 다음 획은 어디일까요?`, 'good');
@@ -1544,7 +1590,7 @@ function handleStroke(d) {
   sfxBad();
   st.missStreak++;
   const reps = curReps();
-  if (st.mode !== 'trace' || reps.every((r) => r === 'trace')) st.itemMistakes++;
+  if (st.mode !== 'trace' || reps.every((r) => r === 'trace')) { st.itemMistakes++; saveResume(); }
   const n = idx + 1, s = U.strokes[idx];
   let text;
   switch (res.type) {
@@ -1584,6 +1630,7 @@ async function unitDone() {
   const my = animToken;
   if (st.unitIdx < st.units.length - 1) {
     st.busy = true;
+    saveResume({ unitIdx: st.unitIdx + 1, strokeIdx: 0 });
     const next = st.units[st.unitIdx + 1].label;
     setMsg(`${pick(GOOD)} 다음 글자는 ‘${next}’!`, 'good');
     await wait(800);
@@ -1601,6 +1648,7 @@ async function roundDone() {
   st.repIdx++;
   renderPips();
   if (st.repIdx < reps.length) {
+    saveResume({ repIdx: st.repIdx, unitIdx: 0, strokeIdx: 0 });
     sfxRound();
     setMsg(`${st.repIdx}번째 완성! 다음은 ‘${REP_LABEL[reps[st.repIdx]]}’예요.`, 'good');
     await wait(1100);
@@ -1619,14 +1667,17 @@ async function itemDone() {
   else if (store.weak[key]) { store.weak[key] -= 2; if (store.weak[key] <= 0) delete store.weak[key]; }
   save();
   st.sess.results[st.itemIdx] = stars;
+  const last = st.itemIdx >= st.sess.items.length - 1;
+  if (!last) saveResume({ itemIdx: st.itemIdx + 1, repIdx: 0, unitIdx: 0, strokeIdx: 0, itemMistakes: 0 });
+  const summary = last ? finalizeSession() : null;
   sfxRound();
   showStarToast(stars, m);
   renderItems();
   await wait(1500);
   if (my !== animToken) return;
   $('#starToast').hidden = true;
-  if (st.itemIdx < st.sess.items.length - 1) { st.itemIdx++; beginItem(); }
-  else sessionDone();
+  if (!last) { st.itemIdx++; beginItem(); }
+  else showWin(summary);
 }
 function showStarToast(n, m) {
   const t = $('#starToast'); t.innerHTML = '';
@@ -1635,7 +1686,7 @@ function showStarToast(n, m) {
   t.append(H('div', null, row, H('p', { text: m === 0 ? '실수 없이 썼어요!' : n === 2 ? '잘했어요!' : '끝까지 해냈어요!' })));
   t.hidden = false;
 }
-function sessionDone() {
+function finalizeSession() {
   const sess = st.sess, before = sess.before;
   const earned = sess.results.reduce((a, b) => a + (b || 0), 0), max = sess.items.length * 3;
   const rating = earned / max >= 0.9 ? 3 : earned / max >= 0.6 ? 2 : 1;
@@ -1657,7 +1708,13 @@ function sessionDone() {
   if (newSk.length) banners.push(['em', newSk[newSk.length - 1], newSk.length > 1 ? `새 스티커 ${newSk.length}장을 받았어요! ${newSk.join(' ')}` : '새 스티커를 받았어요!']);
   const dayA = todayCount();
   if (before.day < store.goal && dayA >= store.goal) banners.push(['em', '⭐', `오늘 목표 ${store.goal}글자를 다 썼어요!`]);
+  sess.finished = true;
+  store.resume = null;
   save();
+  return { earned, max, rating, banners, nextUp };
+}
+function showWin(sum) {
+  const sess = st.sess, { earned, rating, banners, nextUp } = sum;
   sfxWin(); confetti();
 
   const win = $('#win'); win.innerHTML = '';
@@ -1671,17 +1728,23 @@ function sessionDone() {
     : H('div', { class: 'banner' }, H('span', { class: 'em', text: a }), text));
   const again = H('button', { class: 'btn', type: 'button', text: '다시 하기', onclick: () => {
     if (sess.kind === 'review' && !weakList().length) { leavePractice(); toast('복습할 글자를 모두 익혔어요!'); return; }
-    startSession(sess.stage ? stageSession(sess.stage) : sess.kind === 'review' ? reviewSession() : freeSession(sess.texts, sess.title), st.returnTo);
+    startSession(sess.stage ? stageSession(sess.stage) : sess.kind === 'review' ? reviewSession() : { title: sess.title, kind: sess.kind, texts: sess.texts, reps: sess.reps, watch: sess.watch }, st.returnTo);
   } });
+  const wrong = sess.items.filter((it, i) => (sess.results[i] || 0) < 3).map((it) => it.text);
+  const retry = wrong.length ? H('button', { class: 'btn green', type: 'button', onclick: () => startSession({ title: '틀린 글자 다시 쓰기', kind: 'retry', texts: wrong, reps: ['faint', 'ghost'], watch: false }, st.returnTo) },
+    `틀린 글자만 다시 쓰기 · ${wrong.slice(0, 5).join(' ')}${wrong.length > 5 ? ' …' : ''}`) : null;
   const home = H('button', { class: 'btn', type: 'button', text: st.returnTo === 'free' ? '자유 연습' : '지도 보기', onclick: leavePractice });
   const actions = H('div', { class: 'sheet-actions' }, again, home);
   if (nextUp) actions.append(H('button', { class: 'btn primary', type: 'button', text: '다음 단계', onclick: () => startSession(stageSession(nextUp), 'home') }));
-  win.append(big, H('h2', { text: title }), H('div', { class: 'gain', text: `별 +${earned}` }), results, ...bannerEls, actions);
+  win.append(big, H('h2', { text: title }), H('div', { class: 'gain', text: `별 +${earned}` }), results, ...bannerEls, retry, actions);
   $('#winLayer').hidden = false;
   setTimeout(() => (actions.lastChild).focus({ preventScroll: true }), 50);
 }
 function leavePractice() {
+  const unfinished = st.sess && !st.sess.finished;
+  if (unfinished) saveResume();
   animToken++; st.animating = false; st.busy = false; st.sess = null;
+  if (unfinished) toast('여기까지 저장했어요. 다음에 이어서 해요!');
   hush();
   $('#winLayer').hidden = true; $('#starToast').hidden = true;
   if (st.returnTo === 'free') { show('free'); renderFree(); } else { show('home'); renderHome(); }
@@ -1804,7 +1867,7 @@ $('#watchBtn').addEventListener('click', replayWatch);
 $('#againBtn').addEventListener('click', () => {
   if (!st.sess) return;
   if (st.mode === 'watch') { animToken++; st.busy = false; (st.watchThen || startRound)(); return; }
-  if (!st.busy) { st.strokeIdx = 0; st.hint = false; st.missStreak = 0; renderUnit(); setMsg(roundMsg()); }
+  if (!st.busy) { st.strokeIdx = 0; st.hint = false; st.missStreak = 0; renderUnit(); setMsg(roundMsg()); saveResume(); }
 });
 $('#sayBtn').addEventListener('click', () => { const item = curItem(); if (item) say(item.type === 'jamo' ? jamoName(item.text) : item.text); });
 function syncSound() {
@@ -1821,7 +1884,7 @@ $('#unlockAll').addEventListener('change', (e) => { store.unlockAll = e.target.c
 $('#resetBtn').addEventListener('click', () => { $('#resetConfirm').hidden = false; });
 $('#resetNo').addEventListener('click', () => { $('#resetConfirm').hidden = true; });
 $('#resetYes').addEventListener('click', () => {
-  Object.assign(store, { stars: {}, stages: {}, weak: {}, days: {}, medals: [], total: 0 });
+  Object.assign(store, { stars: {}, stages: {}, weak: {}, days: {}, medals: [], total: 0, resume: null });
   save(); $('#resetConfirm').hidden = true; openChapter = null; renderHome();
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#sheetLayer').hidden) closeSheet(); });

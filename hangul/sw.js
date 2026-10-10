@@ -1,6 +1,6 @@
 // Offline support for 한글 획순 공책: the page and icons are cached on first visit,
 // the page is refreshed from the network whenever it is reachable.
-const CACHE = 'hangul-stroke-v3';
+const CACHE = 'hangul-stroke-v4';
 const FONTS = 'hangul-stroke-fonts';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
