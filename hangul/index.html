@@ -295,6 +295,15 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
 .board-wrap { position: relative; width: min(100%, 560px, calc(100vh - 250px)); min-width: 260px; max-width: 100%; aspect-ratio: 1 / 1; }
 #board { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 16px; box-shadow: 0 6px 0 var(--board-shadow); cursor: crosshair; }
 #board.ghost .gl path { opacity: .4; }
+#board.quiz .gl path { stroke: var(--step-done); opacity: .5; }
+.flash { fill: none; stroke: var(--warn); stroke-linecap: round; stroke-linejoin: round; animation: fade .7s ease-out forwards; }
+.combo { position: absolute; top: 10px; right: 10px; z-index: 2; pointer-events: none; font-family: var(--font-display); font-size: 1.15rem; background: var(--sun); color: var(--sun-ink); border: 2px solid var(--sun-deep); border-radius: 999px; padding: 2px 12px; }
+.combo.pop { animation: pop .35s ease-out; }
+.qnum { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.qbtn { width: 64px; height: 64px; border-radius: 18px; cursor: pointer; border: 2px solid var(--chip-line); border-bottom-width: 5px; background: var(--chip); font-family: var(--font-display); font-size: 1.8rem; }
+.qbtn.no { opacity: .35; border-color: var(--warn); }
+.qbtn.yes { background: var(--accent); border-color: var(--accent-deep); color: var(--accent-ink); }
+.ichip small { font-family: var(--font-body); font-size: .72rem; color: var(--muted); line-height: 1; }
 .star-toast { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
 .star-toast > div { background: var(--chip); border: 3px solid var(--sun-deep); border-radius: 24px; padding: 14px 20px; text-align: center; box-shadow: 0 6px 0 var(--board-shadow); animation: rise .3s ease-out; }
 .star-toast .row { display: flex; gap: 4px; justify-content: center; }
@@ -342,6 +351,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
 @keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.06); } 100% { transform: scale(1); } }
 @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-3px); } }
 @keyframes hop { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-9px); } }
+@keyframes fade { from { opacity: 1; } to { opacity: 0; } }
 @keyframes rise { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* ---------- overlays ---------- */
@@ -456,19 +466,26 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
     <details class="parents">
       <summary>부모님께 · 이렇게 연습해요</summary>
       <div class="parents-body">
-        <h4>한 글자를 세 번 써요</h4>
+        <h4>새 글자는 두 번, 그리고 중간중간 다시 떠올리기</h4>
         <ol>
           <li><b>보기</b> — 처음 나오는 글자는 획이 하나씩 그려지는 것을 먼저 봐요.</li>
           <li><b>따라 쓰기</b> — 번호 점과 화살표를 보며 써요. 이때 틀린 것은 별에 영향이 없어요.</li>
-          <li><b>흐린 글씨</b> — 번호와 화살표 없이 써요. 틀리면 그 획만 힌트가 나와요.</li>
-          <li><b>혼자 쓰기</b> — 아주 흐린 글씨 위에 순서를 기억해서 써요.</li>
+          <li><b>혼자 쓰기</b> — 번호와 화살표 없이 써요. 틀리면 그 획만 힌트가 나와요.</li>
         </ol>
-        <p>흐린 글씨와 혼자 쓰기에서 하나도 안 틀리면 별 3개, 1~2번 틀리면 별 2개예요. 별은 연습할 때마다 쌓여서 레벨과 스티커가 올라가요.</p>
+        <p>같은 글자를 계속 쓰지 않도록, 조금 뒤에 앞에서 배운 글자가 다시 나와요. 다시 나올 때는 이 중 하나예요.</p>
+        <ul>
+          <li><b>순서 맞히기</b> — 획을 쓰는 순서대로 손가락으로 콕콕 눌러요.</li>
+          <li><b>몇 번째 획?</b> — 반짝이는 획이 몇 번째인지 숫자를 골라요.</li>
+          <li><b>기억해서 쓰기</b> — 아주 흐린 글씨 위에 한 번 써요.</li>
+        </ul>
+        <p>실수 없이 하면 별 3개, 1~2번 틀리면 별 2개예요. 틀리지 않고 10번 연속 맞히면 보너스 별을 받아요. 별은 계속 쌓여서 레벨과 스티커가 올라가요.</p>
         <h4>단계와 복습</h4>
         <ul>
           <li>지도는 자음 → 모음 → 글자 → 받침 → 낱말 → 문장 순서로 62단계예요. 한 단계는 3~5분 정도 걸려요.</li>
           <li>장마다 끝에 <b>시험</b>이 있어요. 아주 흐린 글씨로 섞어서 써요. 한 장을 다 깨면 메달을 받아요.</li>
           <li>틀린 글자는 <b>복습</b>에 모여요. 실수 없이 쓰면 복습 목록에서 빠져요.</li>
+          <li>중간에 그만두거나 앱이 꺼져도 획 하나 쓸 때마다 저장돼요. 다음에 <b>하던 곳부터</b>를 누르면 그 글자, 그 획부터 이어서 써요.</li>
+          <li>단계를 마치면 별 3개를 못 받은 글자만 골라 <b>틀린 글자만 다시 쓰기</b>를 할 수 있어요.</li>
           <li><b>자유 연습</b>에서는 단계와 상관없이 음절표 140자, 글자 만들기(모든 글자), 낱말 147개, 문장 18개, 아이 이름을 쓸 수 있어요.</li>
         </ul>
         <h4>획순의 기본 원칙</h4>
@@ -526,8 +543,10 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
         <div class="word-line" id="wordLine" hidden></div>
         <div class="board-wrap">
           <svg id="board" viewBox="0 0 100 100" role="img" aria-label="글씨 쓰는 칸"></svg>
+          <div class="combo" id="combo" hidden></div>
           <div class="star-toast" id="starToast" hidden></div>
         </div>
+        <div class="qnum" id="qnumBox" hidden></div>
       </div>
       <div class="side-col">
         <div class="pips" id="pips" aria-label="쓰기 횟수"></div>
@@ -995,8 +1014,10 @@ function itemType(text) {
 const keyOf = (text) => (itemType(text) === 'jamo' ? 'j:' : itemType(text) === 'syllable' ? 's:' : 'w:') + text;
 const bestOf = (text) => store.stars[keyOf(text)] || 0;
 const textOfKey = (k) => k.slice(2);
-function defaultReps(type) { return type === 'jamo' || type === 'syllable' ? ['trace', 'faint', 'ghost'] : type === 'word' ? ['trace', 'ghost'] : ['faint']; }
-const REP_LABEL = { trace: '따라 쓰기', faint: '흐린 글씨', ghost: '혼자 쓰기' };
+function defaultReps(type) { return type === 'jamo' || type === 'syllable' ? ['trace', 'faint'] : type === 'word' ? ['trace', 'ghost'] : ['faint']; }
+const REP_LABEL = { trace: '따라 쓰기', faint: '혼자 쓰기', ghost: '기억해서 쓰기', quiz: '순서 맞히기', qnum: '몇 번째 획?' };
+const WRITE_MODES = new Set(['trace', 'faint', 'ghost']);
+const isLetterType = (ty) => ty === 'jamo' || ty === 'syllable';
 
 /* ================= sound & voice ================= */
 let actx = null, lastSfx = 0;
@@ -1049,7 +1070,7 @@ let layers = null;
 const board = $('#board');
 const unit = () => st.units[st.unitIdx];
 const curItem = () => st.sess.items[st.itemIdx];
-const repsOf = (item) => st.sess.reps || defaultReps(item.type);
+const repsOf = (item) => item.reps || defaultReps(item.type);
 const curReps = () => repsOf(curItem());
 
 /* ================= screens ================= */
@@ -1087,10 +1108,15 @@ function renderHome() {
   $('#todayN').textContent = n; $('#todayGoal').textContent = store.goal;
   $('#todayBar').style.width = `${Math.min(100, (n / store.goal) * 100)}%`;
   renderWeek();
-  const ns = nextStage();
+  const ns = nextStage(), r = store.resume;
   const cb = $('#continueBtn'); cb.innerHTML = '';
-  cb.append(H('div', null, stageDone(ns) ? '다시 하기' : '이어서 하기', H('span', { text: `${ns.id} ${ns.name}` })));
-  cb.onclick = () => openSheet(ns);
+  if (r && r.def && resumeText(r)) {
+    cb.append(H('div', null, '하던 곳부터', H('span', { text: `${r.def.title} · ‘${resumeText(r)}’` })));
+    cb.onclick = () => resumeSession();
+  } else {
+    cb.append(H('div', null, stageDone(ns) ? '다시 하기' : '이어서 하기', H('span', { text: `${ns.id} ${ns.name}` })));
+    cb.onclick = () => openSheet(ns);
+  }
   const weak = weakList();
   const rb = $('#reviewBtn'); rb.innerHTML = '';
   rb.append(H('div', null, '복습', H('span', { text: weak.length ? `틀린 글자 ${weak.length}개` : '틀린 글자 없음' })));
@@ -1150,7 +1176,8 @@ function renderRoad(ch, road, ns) {
     if (!open) disc.append(useIcon('i-lock'));
     else if (s.test) disc.append(useIcon('i-trophy'));
     else disc.append(s.id);
-    if (cur) disc.append(H('span', { class: 'flag', text: '여기부터!' }));
+    const inProgress = store.resume && store.resume.def && store.resume.def.stageId === s.id;
+    if (inProgress || cur) disc.append(H('span', { class: 'flag', text: inProgress ? '하던 중' : '여기부터!' }));
     const sub = s.test ? `${s.pick}개 섞어서` : s.items.join(itemType(s.items[0]) === 'jamo' || itemType(s.items[0]) === 'syllable' ? ' ' : ', ');
     road.append(H('button', {
       class: 'node' + (done ? ' done' : '') + (!open ? ' locked' : '') + (cur ? ' cur' : '') + (s.test ? ' test' : ''),
@@ -1174,6 +1201,7 @@ function renderShelf() {
 function openSheet(s) {
   const sh = $('#sheet'); sh.innerHTML = '';
   const best = store.stages[s.id] || 0;
+  const inProg = !!(store.resume && store.resume.def && store.resume.def.stageId === s.id);
   const prev = H('div', { class: 'preview' });
   const list = s.test ? [] : s.items;
   list.forEach((t) => {
@@ -1183,17 +1211,28 @@ function openSheet(s) {
   });
   let desc;
   if (s.test) desc = `지금까지 배운 글자 중 ${s.pick}개가 섞여 나와요. 아주 흐린 글씨 위에 순서를 기억해서 한 번씩 써요.`;
-  else if (s.review) desc = '헷갈리기 쉬운 글자를 흐린 글씨와 혼자 쓰기로 두 번씩 다시 써요.';
-  else { const reps = defaultReps(itemType(s.items[0])); desc = `글자마다 ${reps.map((r) => REP_LABEL[r]).join(' → ')}로 ${reps.length}번 써요.`; }
+  else if (s.review) desc = '헷갈리기 쉬운 글자를 한 번씩 쓰고, 사이사이 획순 퀴즈를 풀어요.';
+  else {
+    const ty = itemType(s.items[0]);
+    desc = ty === 'sentence' ? '문장을 흐린 글씨 위에 한 번 써요.'
+      : ty === 'word' ? '낱말을 따라 쓰고, 조금 뒤에 기억해서 한 번 더 써요. 중간에 퀴즈도 있어요.'
+      : '새 글자는 따라 쓰기 → 혼자 쓰기로 두 번 쓰고, 중간중간 앞에서 배운 글자를 퀴즈와 기억해서 쓰기로 다시 떠올려요.';
+  }
   sh.append(
     H('div', { class: 'kicker', text: `${s.ci + 1}장 ${s.ch.title} · ${s.id}` }),
     H('h2', { text: s.name }),
     prev.childNodes.length ? prev : null,
     H('p', { text: desc }),
     best ? H('div', null, H('span', { text: '최고 기록 ' }), miniStars(best)) : null,
-    H('div', { class: 'sheet-actions' },
-      H('button', { class: 'btn', type: 'button', text: '닫기', onclick: closeSheet }),
-      H('button', { class: 'btn primary', type: 'button', text: best ? '다시 하기' : '시작하기', onclick: () => { closeSheet(); startSession(stageSession(s), 'home'); } })));
+    inProg ? H('p', { class: 'tip', text: `지난번에 ‘${resumeText(store.resume)}’ 하다가 멈췄어요. 거기부터 이어서 해요.` }) : null,
+    inProg
+      ? H('div', { class: 'sheet-actions' },
+        H('button', { class: 'btn', type: 'button', text: '닫기', onclick: closeSheet }),
+        H('button', { class: 'btn', type: 'button', text: '처음부터', onclick: () => { closeSheet(); startSession(stageSession(s), 'home'); } }),
+        H('button', { class: 'btn primary', type: 'button', text: '이어서 하기', onclick: () => { closeSheet(); resumeSession(); } }))
+      : H('div', { class: 'sheet-actions' },
+        H('button', { class: 'btn', type: 'button', text: '닫기', onclick: closeSheet }),
+        H('button', { class: 'btn primary', type: 'button', text: best ? '다시 하기' : '시작하기', onclick: () => { closeSheet(); startSession(stageSession(s), 'home'); } })));
   $('#sheetLayer').hidden = false;
   setTimeout(() => sh.querySelector('.btn.primary').focus({ preventScroll: true }), 30);
 }
@@ -1201,27 +1240,105 @@ function closeSheet() { $('#sheetLayer').hidden = true; }
 $('#sheetLayer').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeSheet(); });
 
 /* ---------- sessions ---------- */
-function stageSession(s) {
-  if (s.test) return { title: `${s.id} ${s.name}`, kind: 'test', stage: s, texts: shuffle(s.pool).slice(0, s.pick), reps: ['ghost'], watch: false };
-  if (s.review) return { title: `${s.id} ${s.name}`, kind: 'stage', stage: s, texts: s.items, reps: ['faint', 'ghost'], watch: false };
-  return { title: `${s.id} ${s.name}`, kind: 'stage', stage: s, texts: s.items };
+/* A lesson writes each new letter at most twice in a row (따라 쓰기 → 혼자 쓰기) and brings earlier letters back
+   in between as short reminders: tap the strokes in order, name a stroke's number, or write it once from memory. */
+const unitKind = (text) => (itemType(text) === 'jamo' ? 'jamo' : 'syllable');
+function remindTask(text, c) {
+  if (!isLetterType(itemType(text))) return { text, reps: ['ghost'], watch: false, tag: 'remind' };
+  const n = makeUnit(text, unitKind(text)).strokes.length;
+  const kind = n === 1 ? 'ghost' : ['quiz', 'ghost', 'qnum'][c % 3];
+  if (kind === 'qnum' && n >= 3) return { text, reps: ['qnum'], watch: false, tag: 'quiz', q: 1 + Math.floor(Math.random() * (n - 1)) };
+  if (kind === 'ghost') return { text, reps: ['ghost'], watch: false, tag: 'remind' };
+  return { text, reps: ['quiz'], watch: false, tag: 'quiz' };
 }
-function reviewSession() { return { title: '틀린 글자 복습', kind: 'review', texts: weakList().slice(0, 6), reps: ['faint', 'ghost'], watch: false }; }
-function freeSession(texts, title) { return { title, kind: 'free', texts }; }
+function oldPick(s, letter) {
+  const pool = [];
+  STAGES.forEach((x) => {
+    if (x.gi >= s.gi || x.test || !stageDone(x)) return;
+    x.items.forEach((t) => { if (letter) { if (isLetterType(itemType(t))) pool.push(t); } else [...t].filter(isSyl).forEach((ch) => pool.push(ch)); });
+  });
+  if (!pool.length) return null;
+  const weak = pool.filter((t) => store.weak[keyOf(t)] > 0);
+  return pick(weak.length ? weak : pool);
+}
+function lessonTasks(s) {
+  const items = s.items, ty = itemType(items[0]), letter = isLetterType(ty);
+  if (ty === 'sentence') return items.map((t) => ({ text: t, reps: ['faint'], watch: false, tag: 'new' }));
+  let c = s.gi;
+  const tasks = [];
+  items.forEach((t, i) => {
+    tasks.push(letter ? { text: t, reps: ['trace', 'faint'], watch: true, tag: 'new' } : { text: t, reps: ['trace'], watch: false, tag: 'new' });
+    if (i >= 1) tasks.push(remindTask(items[i - 1], c++));
+  });
+  const old = oldPick(s, letter);
+  if (old) tasks.push(letter ? remindTask(old, c++) : { text: old, reps: ['quiz'], watch: false, tag: 'quiz' });
+  tasks.push(remindTask(items[items.length - 1], c++));
+  return tasks;
+}
+/* each letter once, alternating a write with a quiz */
+function mixTasks(texts) {
+  return texts.map((t, i) => {
+    const ty = itemType(t);
+    if (i % 2 === 1 && isLetterType(ty) && makeUnit(t, unitKind(t)).strokes.length > 1) return remindTask(t, i % 4 === 1 ? 0 : 2);
+    return { text: t, reps: [isLetterType(ty) || ty === 'sentence' ? 'faint' : 'ghost'], watch: false, tag: 'remind' };
+  });
+}
+function testTasks(s) {
+  return shuffle(s.pool).slice(0, s.pick).map((t, i) => (
+    (i === 2 || i === 5) && isLetterType(itemType(t)) && makeUnit(t, unitKind(t)).strokes.length > 1
+      ? remindTask(t, i === 2 ? 0 : 2)
+      : { text: t, reps: ['ghost'], watch: false }));
+}
+function stageSession(s) {
+  const title = `${s.id} ${s.name}`;
+  if (s.test) return { title, kind: 'test', stage: s, tasks: testTasks(s) };
+  if (s.review) return { title, kind: 'stage', stage: s, tasks: mixTasks(s.items) };
+  return { title, kind: 'stage', stage: s, tasks: lessonTasks(s) };
+}
+function reviewSession() { return { title: '틀린 글자 복습', kind: 'review', tasks: mixTasks(weakList().slice(0, 6)) }; }
+function freeSession(texts, title) { return { title, kind: 'free', tasks: texts.length === 1 ? [{ text: texts[0] }] : mixTasks(texts) }; }
 
-function startSession(def, returnTo) {
+function startSession(def, returnTo, resume) {
   audio();
-  st.sess = Object.assign({}, def, { items: def.texts.map((t) => ({ text: t, type: itemType(t) })) });
-  st.sess.results = [];
-  st.sess.before = { total: store.total, day: todayCount(), medals: store.medals.length };
+  const tasks = def.tasks || (def.texts || []).map((t) => ({ text: t, reps: def.reps || null, watch: def.watch === undefined ? null : def.watch }));
+  st.sess = Object.assign({}, def, { tasks, items: tasks.map((t) => ({ text: t.text, type: itemType(t.text), reps: t.reps || null, watch: t.watch === undefined ? null : t.watch, tag: t.tag || null, q: t.q === undefined ? null : t.q })) });
+  st.sess.bonus = 0; st.combo = 0; $('#combo').hidden = true;
+  st.sess.results = resume && Array.isArray(resume.results) ? resume.results.slice() : [];
+  st.sess.before = resume && resume.before ? Object.assign({}, resume.before, { day: todayCount() }) : { total: store.total, day: todayCount(), medals: store.medals.length };
   st.returnTo = returnTo || 'home';
-  st.itemIdx = 0;
+  st.itemIdx = resume ? Math.min(Math.max(0, resume.itemIdx | 0), st.sess.items.length - 1) : 0;
   $('#sessTitle').textContent = def.title;
   $('#winLayer').hidden = true;
   show('practice');
-  beginItem();
+  beginItem(resume || null);
+  saveResume();
 }
-function beginItem() {
+/* Progress is saved after every stroke, so leaving, closing the app or a crash resumes at the same letter and stroke. */
+function saveResume(ptr) {
+  const s = st.sess;
+  if (!s || s.finished) return;
+  const p = Object.assign({ itemIdx: st.itemIdx, repIdx: st.repIdx, unitIdx: st.unitIdx, strokeIdx: st.mode === 'watch' ? 0 : st.strokeIdx, itemMistakes: st.itemMistakes }, ptr || {});
+  store.resume = Object.assign({
+    def: { title: s.title, kind: s.kind, stageId: s.stage ? s.stage.id : null, tasks: s.items.map((it) => ({ text: it.text, reps: it.reps, watch: it.watch, tag: it.tag, q: it.q })) },
+    returnTo: st.returnTo, results: s.results.map((x) => x || 0), before: s.before, savedAt: Date.now(),
+  }, p);
+  save();
+}
+function resumeText(r) {
+  const list = r && r.def && (Array.isArray(r.def.tasks) ? r.def.tasks.map((t) => t && t.text) : Array.isArray(r.def.texts) ? r.def.texts : null);
+  return list && list.length ? (list[r.itemIdx] || list[0] || '') : '';
+}
+function resumeSession() {
+  const r = store.resume;
+  if (!r || !r.def || !(resumeText(r))) { store.resume = null; save(); return false; }
+  const def = Object.assign({}, r.def);
+  if (def.watch === null) delete def.watch;
+  if (def.reps === null) delete def.reps;
+  if (def.stageId) { def.stage = STAGES.find((x) => x.id === def.stageId); if (!def.stage) delete def.stage; }
+  startSession(def, r.returnTo, r);
+  return true;
+}
+function beginItem(resume) {
   const item = curItem();
   st.units = []; st.display = [];
   if (item.type === 'jamo') st.units = [makeUnit(item.text, 'jamo')];
@@ -1229,21 +1346,32 @@ function beginItem() {
     if (isSyl(ch)) { st.display.push({ ch, u: st.units.length }); st.units.push(makeUnit(ch, 'syllable')); }
     else st.display.push({ ch, u: null });
   }
-  st.repIdx = 0; st.itemMistakes = 0; st.unitIdx = 0;
+  st.repIdx = 0; st.itemMistakes = 0; st.unitIdx = 0; st.committed = -1;
   renderItems();
-  const watch = st.sess.watch !== undefined ? st.sess.watch : (item.type === 'jamo' || item.type === 'syllable');
+  if (resume) {
+    st.repIdx = Math.min(Math.max(0, resume.repIdx | 0), curReps().length - 1);
+    st.itemMistakes = resume.itemMistakes | 0;
+    const ui = Math.min(Math.max(0, resume.unitIdx | 0), st.units.length - 1), sk = Math.max(0, resume.strokeIdx | 0);
+    startRound({ unitIdx: ui, strokeIdx: sk < st.units[ui].strokes.length ? sk : 0 });
+    return;
+  }
+  const watch = item.watch !== null && item.watch !== undefined ? item.watch : isLetterType(item.type);
   if (watch) startWatch(() => startRound()); else startRound();
 }
-function startRound() {
+function startRound(at) {
   animToken++; st.animating = false; st.busy = false;
-  st.mode = curReps()[st.repIdx]; st.unitIdx = 0; st.strokeIdx = 0; st.hint = false; st.missStreak = 0;
+  st.mode = curReps()[st.repIdx]; st.unitIdx = at ? at.unitIdx : 0; st.strokeIdx = at ? at.strokeIdx : 0; st.hint = false; st.missStreak = 0;
   renderUnit(); renderPips();
-  setMsg(roundMsg());
+  setMsg(at ? `지난번에 멈춘 곳부터 이어서 써요!${st.mode === 'trace' ? ` 반짝이는 ${st.strokeIdx + 1}번 점에서 시작해요.` : ''}` : roundMsg());
+  saveResume();
 }
 function roundMsg() {
+  const it = curItem();
   if (st.mode === 'trace') return '반짝이는 1번 점에서 시작해서 화살표 쪽으로 그어요.';
-  if (st.mode === 'faint') return '이번엔 번호가 없어요. 흐린 글씨 위에 순서대로 써요.';
-  return '아주 흐린 글씨예요. 순서를 기억해서 혼자 써 봐요!';
+  if (st.mode === 'faint') return '이번엔 번호 없이 혼자 써요!';
+  if (st.mode === 'quiz') return `순서 맞히기! ‘${it.text}’의 1번 획을 손가락으로 콕 눌러요.`;
+  if (st.mode === 'qnum') return '반짝이는 획은 몇 번째로 쓸까요? 아래 숫자를 눌러요.';
+  return it.tag === 'remind' ? `기억나요? ‘${it.text}’를 순서대로 써 봐요!` : '아주 흐린 글씨예요. 순서를 기억해서 써 봐요!';
 }
 function startWatch(then) {
   st.mode = 'watch'; st.strokeIdx = 0; st.hint = false; st.watchThen = then;
@@ -1257,7 +1385,7 @@ function renderItems() {
   st.sess.items.forEach((it, i) => {
     const r = st.sess.results[i];
     box.append(H('div', { class: 'ichip' + ([...it.text].length > 2 ? ' long' : '') + (i === st.itemIdx ? ' on' : '') + (r ? ' done' : '') },
-      H('span', { text: it.text }), r ? miniStars(r) : null));
+      H('span', { text: it.text }), r ? miniStars(r) : it.tag === 'quiz' ? H('small', { text: '퀴즈' }) : it.tag === 'remind' ? H('small', { text: '기억' }) : null));
   });
   const on = box.children[st.itemIdx];
   if (on) on.scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
@@ -1275,7 +1403,7 @@ function renderInfo() {
   $('#itemName').textContent = item.type === 'jamo' ? `${u.label}  ${jamoName(u.label)}` : item.text;
   $('#strokeCount').textContent = st.units.length > 1 ? `${u.label} · ${u.strokes.length}획` : `${u.strokes.length}획`;
   const tip = $('#tipBox'); tip.innerHTML = '';
-  if (u.kind === 'jamo') tip.append(H('p', { class: 'tip', text: TIPS[u.label] || '' }));
+  if (u.kind === 'jamo') { if (!['quiz', 'qnum', 'ghost'].includes(st.mode)) tip.append(H('p', { class: 'tip', text: TIPS[u.label] || '' })); }
   else {
     const d = decompose(u.label);
     const line = H('div', { class: 'order-line' });
@@ -1303,6 +1431,7 @@ function renderInfo() {
 function setupBoard() {
   board.innerHTML = '';
   board.classList.toggle('ghost', st.mode === 'ghost');
+  board.classList.toggle('quiz', st.mode === 'quiz' || st.mode === 'qnum');
   S('rect', { x: 1, y: 1, width: 98, height: 98, rx: 3, fill: 'var(--paper)', stroke: 'var(--frame)', 'stroke-width': 0.9 }, board);
   S('path', { d: 'M50 1.5 V98.5 M1.5 50 H98.5', stroke: 'var(--line)', 'stroke-width': 0.6, 'stroke-dasharray': '2 2', fill: 'none' }, board);
   layers = {};
@@ -1344,9 +1473,10 @@ function arrowHead(layer, s, color, w) {
 function showHint() {
   layers.hint.innerHTML = '';
   const u = unit();
-  const visible = st.mode === 'trace' || ((st.mode === 'faint' || st.mode === 'ghost') && st.hint);
+  const visible = st.mode === 'trace' || ((st.mode === 'faint' || st.mode === 'ghost' || st.mode === 'quiz') && st.hint);
   if (!visible || st.strokeIdx >= u.strokes.length) return;
   const i = st.strokeIdx, s = u.strokes[i], c = colorOf(u, i);
+  if (st.mode === 'quiz') { S('path', { d: s.d, 'stroke-width': u.w * 1.6, class: 'hint-glow', style: `stroke:${c}` }, layers.hint); return; }
   S('path', { d: s.d, 'stroke-width': u.w, class: 'hint-glow', style: `stroke:${c}` }, layers.hint);
   S('path', { d: s.d, 'stroke-width': u.w * 0.4, class: 'hint-march', style: `stroke:${c}` }, layers.hint);
   arrowHead(layers.hint, s, c, u.w);
@@ -1373,8 +1503,27 @@ function renderSteps() {
 }
 function renderUnit() {
   setupBoard(); drawGuide();
-  for (let i = 0; i < st.strokeIdx; i++) drawDone(i, false);
-  renderInfo(); renderSteps(); showHint();
+  const u = unit();
+  for (let i = 0; i < st.strokeIdx; i++) {
+    drawDone(i, false);
+    if (st.mode === 'quiz') drawBadge(layers.badges, u.strokes[i], i, colorOf(u, i), u.kind === 'jamo' ? 5 : 4.2, true);
+  }
+  if (st.mode === 'qnum') drawQnumTarget();
+  renderInfo(); renderSteps(); showHint(); renderQnum();
+}
+const qTarget = () => Math.min(Math.max(0, curItem().q || 0), unit().strokes.length - 1);
+function drawQnumTarget() {
+  const u = unit(), k = qTarget(), s = u.strokes[k], c = colorOf(u, k);
+  S('path', { d: s.d, 'stroke-width': u.w * 1.7, class: 'hint-glow', style: `stroke:${c}` }, layers.done);
+  S('path', { d: s.d, 'stroke-width': u.w, style: `stroke:${c}` }, layers.done);
+  arrowHead(layers.done, s, c, u.w);
+}
+function renderQnum() {
+  const box = $('#qnumBox');
+  if (st.mode !== 'qnum') { box.hidden = true; return; }
+  box.hidden = false; box.innerHTML = '';
+  const n = unit().strokes.length;
+  for (let j = 1; j <= n; j++) box.append(H('button', { class: 'qbtn', type: 'button', text: String(j), 'aria-label': `${j}번째`, onclick: (e) => qnumAnswer(j, e.currentTarget) }));
 }
 
 /* ---------- messages ---------- */
@@ -1393,26 +1542,26 @@ async function playWatch(then) {
   st.animating = true;
   const u = unit();
   setMsg('잘 보세요! 숫자 순서대로 써 볼게요.');
-  await wait(600);
+  await wait(250);
   for (let i = 0; i < u.strokes.length; i++) {
     if (my !== animToken) return;
     const s = u.strokes[i], c = colorOf(u, i);
     drawBadge(layers.badges, s, i, c, u.kind === 'jamo' ? 5 : 4.2, true);
     await animateStroke(s, c, u.w, layers.anim, my);
-    await wait(260);
+    await wait(150);
   }
   if (my !== animToken) return;
   st.animating = false;
   setMsg('이제 써 볼까요?', 'good');
-  await wait(900);
+  await wait(450);
   if (my !== animToken) return;
   then();
 }
-function animateStroke(s, color, w, layer, token) {
+function animateStroke(s, color, w, layer, token, speed = 1) {
   return new Promise((res) => {
     const path = S('path', { d: '', 'stroke-width': w, style: `stroke:${color}` }, layer);
     const tip = S('circle', { r: w * 0.62, style: `fill:${color}`, opacity: 0.55 }, layer);
-    const dur = 450 + s.len * 11, t0 = performance.now();
+    const dur = (300 + s.len * 7) * speed, t0 = performance.now();
     const step = (now) => {
       if (token !== animToken) return res();
       const t = Math.min(1, (now - t0) / dur);
@@ -1431,7 +1580,7 @@ function replayWatch() {
   const mode = st.mode === 'watch' ? curReps()[st.repIdx] : st.mode;
   const item = curItem();
   say(item.type === 'jamo' ? jamoName(item.text) : unit().label);
-  startWatch(() => { st.mode = mode; st.strokeIdx = 0; st.hint = false; st.busy = false; renderUnit(); renderPips(); setMsg(roundMsg()); });
+  startWatch(() => { st.mode = mode; st.strokeIdx = 0; st.hint = false; st.busy = false; renderUnit(); renderPips(); setMsg(roundMsg()); saveResume(); });
 }
 
 /* ---------- judging a drawn stroke ---------- */
@@ -1496,15 +1645,38 @@ function toLocal(e) {
   const r = board.getBoundingClientRect();
   return [((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100];
 }
+/* Hand and palm touches never count as mistakes:
+   - a touch that starts away from the letter (edge of the square, a resting hand) is ignored,
+   - after the pen is used, finger/palm touches are ignored for a minute, and wide contacts are treated as a palm,
+   - a second contact while drawing (palm + pen) throws the touch line away instead of judging it. */
+let penAt = -1e9;
+const PEN_GRACE = 60000;
+function inLetterZone(p) {
+  const u = unit();
+  if (!u) return true;
+  if (!u.zone) { const b = bbox(u.strokes.flatMap((x) => x.pts)), m = u.kind === 'jamo' ? 14 : 11; u.zone = [b[0] - m, b[1] - m, b[2] + m, b[3] + m]; }
+  const z = u.zone;
+  return p[0] >= z[0] && p[0] <= z[2] && p[1] >= z[1] && p[1] <= z[3];
+}
+const isPalm = (e) => e.pointerType === 'touch' && (performance.now() - penAt < PEN_GRACE || e.width > 45 || e.height > 45);
 board.addEventListener('pointerdown', (e) => {
-  if (drawing || !layers || !st.sess) return;
+  if (!layers || !st.sess) return;
+  if (e.pointerType === 'pen') penAt = performance.now();
+  if (isPalm(e)) return;
+  if (drawing) {
+    if (e.pointerType === 'pen' && drawing.type !== 'pen') { drawing.el.remove(); drawing = null; }
+    else { drawing.multi = true; return; }
+  }
+  const p = toLocal(e);
+  if (!inLetterZone(p)) return;
   audio();
   if (st.mode === 'watch') { animToken++; st.animating = false; st.busy = false; (st.watchThen || startRound)(); }
   if (st.busy || !$('#winLayer').hidden) return;
+  if (st.mode === 'quiz') { e.preventDefault(); quizTap(p); return; }
+  if (st.mode === 'qnum') return;
   e.preventDefault();
   try { board.setPointerCapture(e.pointerId); } catch (err) {}
-  const p = toLocal(e);
-  drawing = { id: e.pointerId, pts: [p], el: S('path', { class: 'ink', d: toD([p]), 'stroke-width': unit().w * 0.78 }, layers.ink) };
+  drawing = { id: e.pointerId, type: e.pointerType, multi: false, pts: [p], el: S('path', { class: 'ink', d: toD([p]), 'stroke-width': unit().w * 0.78 }, layers.ink) };
 });
 board.addEventListener('pointermove', (e) => {
   if (!drawing || e.pointerId !== drawing.id) return;
@@ -1519,6 +1691,7 @@ board.addEventListener('pointermove', (e) => {
 function endDraw(e) {
   if (!drawing || e.pointerId !== drawing.id) return;
   const d = drawing; drawing = null;
+  if (d.multi || e.type === 'pointercancel') { d.el.remove(); return; }
   try { handleStroke(d); } catch (err) { d.el.remove(); st.busy = false; setMsg('선을 따라 천천히 다시 그어 볼까요?'); }
 }
 board.addEventListener('pointerup', endDraw);
@@ -1531,9 +1704,10 @@ function handleStroke(d) {
   if (res.type === 'ok') {
     d.el.remove();
     drawDone(idx, true);
-    sfxGood(idx);
+    bumpCombo(); sfxGood(Math.min(st.combo, 8));
     st.strokeIdx++; st.missStreak = 0; st.hint = false;
     if (st.strokeIdx >= U.strokes.length) { layers.hint.innerHTML = ''; unitDone(); return; }
+    saveResume();
     showHint();
     if (st.mode === 'trace') setMsg(`${pick(GOOD)} 이제 ${st.strokeIdx + 1}번 획이에요.`, 'good');
     else setMsg(`${pick(GOOD)} 다음 획은 어디일까요?`, 'good');
@@ -1541,10 +1715,10 @@ function handleStroke(d) {
   }
   d.el.classList.add('bad');
   setTimeout(() => d.el.remove(), 1000);
-  sfxBad();
+  sfxBad(); breakCombo();
   st.missStreak++;
   const reps = curReps();
-  if (st.mode !== 'trace' || reps.every((r) => r === 'trace')) st.itemMistakes++;
+  if (st.mode !== 'trace' || reps.every((r) => r === 'trace')) { st.itemMistakes++; saveResume(); }
   const n = idx + 1, s = U.strokes[idx];
   let text;
   switch (res.type) {
@@ -1559,6 +1733,70 @@ function handleStroke(d) {
   setMsg(text, 'bad');
   if (st.mode !== 'trace' && !st.hint) { st.hint = true; showHint(); }
   if ((st.mode === 'trace' && st.missStreak >= 2) || st.missStreak >= 3) demoCurrent();
+}
+/* 연속 정답: every 10 in a row gives a bonus star */
+function bumpCombo() {
+  st.combo = (st.combo || 0) + 1;
+  const el = $('#combo');
+  if (st.combo >= 3) { el.textContent = `${st.combo}연속!`; el.hidden = false; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+  if (st.combo % 10 === 0) {
+    store.total += 1; st.sess.bonus = (st.sess.bonus || 0) + 1; save(); syncStars();
+    el.textContent = `${st.combo}연속! 보너스 별 +1`;
+    note(PENTA[8], 0.18, 0.35, 'sine', 0.12);
+  }
+}
+function breakCombo() { st.combo = 0; $('#combo').hidden = true; }
+async function quizTap(p) {
+  const u = unit(), idx = st.strokeIdx;
+  const d = u.strokes.map((s) => { let m = Infinity; for (const q of s.s) { const v = dist(p, q); if (v < m) m = v; } return m; });
+  let best = 0; d.forEach((v, k) => { if (v < d[best]) best = k; });
+  const tol = u.kind === 'jamo' ? 10 : 8;
+  if (d[best] > tol) return;
+  if (d[idx] <= tol && d[idx] - d[best] < 2.5) {
+    st.busy = true; st.missStreak = 0; st.hint = false; layers.hint.innerHTML = '';
+    bumpCombo(); sfxGood(Math.min(st.combo, 8));
+    const s = u.strokes[idx], c = colorOf(u, idx), my = ++animToken;
+    if (idx === u.strokes.length - 1 && onLastStep()) commitItem();
+    drawBadge(layers.badges, s, idx, c, u.kind === 'jamo' ? 5 : 4.2, true);
+    await animateStroke(s, c, u.w, layers.anim, my, 0.55);
+    if (my !== animToken) return;
+    layers.anim.innerHTML = ''; drawDone(idx, true);
+    st.strokeIdx++; st.busy = false;
+    if (st.strokeIdx >= u.strokes.length) { unitDone(); return; }
+    saveResume();
+    setMsg(`${pick(GOOD)} ${st.strokeIdx + 1}번째 획은 어디일까요?`, 'good');
+    return;
+  }
+  if (best < idx) { setMsg('그 획은 벌써 골랐어요. 다음 획을 찾아봐요!'); return; }
+  sfxBad(); breakCombo(); st.itemMistakes++; st.missStreak++; saveResume();
+  const fl = S('path', { d: u.strokes[best].d, 'stroke-width': u.w, class: 'flash' }, layers.ink);
+  setTimeout(() => fl.remove(), 700);
+  setMsg(`그 획은 ${best + 1}번째예요. ${idx + 1}번째 획을 찾아봐요!`, 'bad');
+  if (st.missStreak >= 2) { st.hint = true; showHint(); }
+}
+async function qnumAnswer(j, btn) {
+  if (st.busy || st.mode !== 'qnum' || btn.disabled) return;
+  audio();
+  const u = unit(), k = qTarget();
+  if (j !== k + 1) {
+    btn.classList.add('no'); btn.disabled = true;
+    sfxBad(); breakCombo(); st.itemMistakes++; saveResume();
+    setMsg(`${j < k + 1 ? '더 뒤에' : '더 앞에'} 써요. 1번 획부터 차례로 세어 봐요.`, 'bad');
+    return;
+  }
+  btn.classList.add('yes'); st.busy = true;
+  if (onLastStep()) commitItem();
+  bumpCombo(); sfxGood(Math.min(st.combo, 8));
+  setMsg(`${pick(GOOD)} ${j}번째 획이에요!`, 'good');
+  const my = ++animToken;
+  layers.done.innerHTML = '';
+  for (let i = 0; i < u.strokes.length; i++) {
+    drawBadge(layers.badges, u.strokes[i], i, colorOf(u, i), u.kind === 'jamo' ? 5 : 4.2, true);
+    await animateStroke(u.strokes[i], colorOf(u, i), u.w, layers.anim, my, 0.45);
+    if (my !== animToken) return;
+  }
+  st.strokeIdx = u.strokes.length;
+  unitDone();
 }
 async function demoCurrent() {
   const U = unit(), i = st.strokeIdx, s = U.strokes[i];
@@ -1580,13 +1818,14 @@ async function demoCurrent() {
 
 /* ---------- progress through a session ---------- */
 async function unitDone() {
-  store.days[dayKey()] = todayCount() + 1; save();
+  if (WRITE_MODES.has(st.mode)) { store.days[dayKey()] = todayCount() + 1; save(); }
   const my = animToken;
   if (st.unitIdx < st.units.length - 1) {
     st.busy = true;
+    saveResume({ unitIdx: st.unitIdx + 1, strokeIdx: 0 });
     const next = st.units[st.unitIdx + 1].label;
     setMsg(`${pick(GOOD)} 다음 글자는 ‘${next}’!`, 'good');
-    await wait(800);
+    await wait(500);
     if (my !== animToken) return;
     st.unitIdx++; st.strokeIdx = 0; st.hint = false; st.busy = false;
     renderUnit();
@@ -1601,17 +1840,20 @@ async function roundDone() {
   st.repIdx++;
   renderPips();
   if (st.repIdx < reps.length) {
+    saveResume({ repIdx: st.repIdx, unitIdx: 0, strokeIdx: 0 });
     sfxRound();
-    setMsg(`${st.repIdx}번째 완성! 다음은 ‘${REP_LABEL[reps[st.repIdx]]}’예요.`, 'good');
-    await wait(1100);
+    setMsg(`${pick(GOOD)} 이번엔 ‘${REP_LABEL[reps[st.repIdx]]}’!`, 'good');
+    await wait(650);
     if (my !== animToken) return;
     startRound();
     return;
   }
   itemDone();
 }
-async function itemDone() {
-  const item = curItem(), key = keyOf(item.text), my = animToken;
+/* Record a finished task once, as soon as it is finished (before any animation), so closing the app never loses it. */
+function commitItem() {
+  if (st.committed === st.itemIdx) return st.commitInfo;
+  const item = curItem(), key = keyOf(item.text);
   const m = st.itemMistakes, stars = m === 0 ? 3 : m <= 2 ? 2 : 1;
   store.stars[key] = Math.max(store.stars[key] || 0, stars);
   store.total += stars;
@@ -1619,14 +1861,24 @@ async function itemDone() {
   else if (store.weak[key]) { store.weak[key] -= 2; if (store.weak[key] <= 0) delete store.weak[key]; }
   save();
   st.sess.results[st.itemIdx] = stars;
+  const last = st.itemIdx >= st.sess.items.length - 1;
+  if (!last) saveResume({ itemIdx: st.itemIdx + 1, repIdx: 0, unitIdx: 0, strokeIdx: 0, itemMistakes: 0 });
+  const summary = last ? finalizeSession() : null;
+  st.committed = st.itemIdx;
+  st.commitInfo = { stars, m, last, summary };
+  return st.commitInfo;
+}
+const onLastStep = () => st.repIdx === curReps().length - 1 && st.unitIdx === st.units.length - 1;
+async function itemDone() {
+  const info = commitItem(), my = animToken;
   sfxRound();
-  showStarToast(stars, m);
+  showStarToast(info.stars, info.m);
   renderItems();
-  await wait(1500);
+  await wait(1000);
   if (my !== animToken) return;
   $('#starToast').hidden = true;
-  if (st.itemIdx < st.sess.items.length - 1) { st.itemIdx++; beginItem(); }
-  else sessionDone();
+  if (!info.last) { st.itemIdx++; beginItem(); }
+  else showWin(info.summary);
 }
 function showStarToast(n, m) {
   const t = $('#starToast'); t.innerHTML = '';
@@ -1635,7 +1887,7 @@ function showStarToast(n, m) {
   t.append(H('div', null, row, H('p', { text: m === 0 ? '실수 없이 썼어요!' : n === 2 ? '잘했어요!' : '끝까지 해냈어요!' })));
   t.hidden = false;
 }
-function sessionDone() {
+function finalizeSession() {
   const sess = st.sess, before = sess.before;
   const earned = sess.results.reduce((a, b) => a + (b || 0), 0), max = sess.items.length * 3;
   const rating = earned / max >= 0.9 ? 3 : earned / max >= 0.6 ? 2 : 1;
@@ -1657,31 +1909,45 @@ function sessionDone() {
   if (newSk.length) banners.push(['em', newSk[newSk.length - 1], newSk.length > 1 ? `새 스티커 ${newSk.length}장을 받았어요! ${newSk.join(' ')}` : '새 스티커를 받았어요!']);
   const dayA = todayCount();
   if (before.day < store.goal && dayA >= store.goal) banners.push(['em', '⭐', `오늘 목표 ${store.goal}글자를 다 썼어요!`]);
+  sess.finished = true;
+  store.resume = null;
   save();
+  return { earned, max, rating, banners, nextUp };
+}
+function showWin(sum) {
+  const sess = st.sess, { earned, rating, banners, nextUp } = sum;
   sfxWin(); confetti();
 
   const win = $('#win'); win.innerHTML = '';
   const title = sess.kind === 'test' ? `${sess.stage.name} 통과!` : sess.stage ? `${sess.stage.id} 단계 통과!` : sess.kind === 'review' ? '복습 끝!' : '다 썼어요!';
   const big = H('div', { class: 'big-stars' });
   for (let i = 0; i < 3; i++) { const s = starSvg(i < rating, i < rating ? 'on' : ''); s.style.animationDelay = `${i * 0.15}s`; big.append(s); }
+  const worst = new Map();
+  sess.items.forEach((it, i) => worst.set(it.text, Math.min(worst.has(it.text) ? worst.get(it.text) : 3, sess.results[i] || 0)));
   const results = H('div', { class: 'results' });
-  sess.items.forEach((it, i) => results.append(H('div', { class: 'res' }, it.text, miniStars(sess.results[i] || 0))));
+  worst.forEach((n, text) => results.append(H('div', { class: 'res' }, text, miniStars(n))));
   const bannerEls = banners.map(([kind, a, text]) => kind === 'medal'
     ? H('div', { class: 'banner', style: `--c: var(--s${a.color})` }, H('span', { class: 'em medal-em', text: a.emblem }), text)
     : H('div', { class: 'banner' }, H('span', { class: 'em', text: a }), text));
   const again = H('button', { class: 'btn', type: 'button', text: '다시 하기', onclick: () => {
     if (sess.kind === 'review' && !weakList().length) { leavePractice(); toast('복습할 글자를 모두 익혔어요!'); return; }
-    startSession(sess.stage ? stageSession(sess.stage) : sess.kind === 'review' ? reviewSession() : freeSession(sess.texts, sess.title), st.returnTo);
+    startSession(sess.stage ? stageSession(sess.stage) : sess.kind === 'review' ? reviewSession() : { title: sess.title, kind: sess.kind, tasks: sess.tasks }, st.returnTo);
   } });
+  const wrong = [...worst].filter(([, n]) => n < 3).map(([t]) => t);
+  const retry = wrong.length ? H('button', { class: 'btn green', type: 'button', onclick: () => startSession({ title: '틀린 글자 다시 쓰기', kind: 'retry', tasks: mixTasks(wrong) }, st.returnTo) },
+    `틀린 글자만 다시 쓰기 · ${wrong.slice(0, 5).join(' ')}${wrong.length > 5 ? ' …' : ''}`) : null;
   const home = H('button', { class: 'btn', type: 'button', text: st.returnTo === 'free' ? '자유 연습' : '지도 보기', onclick: leavePractice });
   const actions = H('div', { class: 'sheet-actions' }, again, home);
   if (nextUp) actions.append(H('button', { class: 'btn primary', type: 'button', text: '다음 단계', onclick: () => startSession(stageSession(nextUp), 'home') }));
-  win.append(big, H('h2', { text: title }), H('div', { class: 'gain', text: `별 +${earned}` }), results, ...bannerEls, actions);
+  win.append(big, H('h2', { text: title }), H('div', { class: 'gain', text: sess.bonus ? `별 +${earned + sess.bonus} (연속 정답 보너스 +${sess.bonus})` : `별 +${earned}` }), results, ...bannerEls, retry, actions);
   $('#winLayer').hidden = false;
   setTimeout(() => (actions.lastChild).focus({ preventScroll: true }), 50);
 }
 function leavePractice() {
+  const unfinished = st.sess && !st.sess.finished;
+  if (unfinished) saveResume();
   animToken++; st.animating = false; st.busy = false; st.sess = null;
+  if (unfinished) toast('여기까지 저장했어요. 다음에 이어서 해요!');
   hush();
   $('#winLayer').hidden = true; $('#starToast').hidden = true;
   if (st.returnTo === 'free') { show('free'); renderFree(); } else { show('home'); renderHome(); }
@@ -1804,7 +2070,7 @@ $('#watchBtn').addEventListener('click', replayWatch);
 $('#againBtn').addEventListener('click', () => {
   if (!st.sess) return;
   if (st.mode === 'watch') { animToken++; st.busy = false; (st.watchThen || startRound)(); return; }
-  if (!st.busy) { st.strokeIdx = 0; st.hint = false; st.missStreak = 0; renderUnit(); setMsg(roundMsg()); }
+  if (!st.busy) { st.strokeIdx = 0; st.hint = false; st.missStreak = 0; renderUnit(); setMsg(roundMsg()); saveResume(); }
 });
 $('#sayBtn').addEventListener('click', () => { const item = curItem(); if (item) say(item.type === 'jamo' ? jamoName(item.text) : item.text); });
 function syncSound() {
@@ -1821,7 +2087,7 @@ $('#unlockAll').addEventListener('change', (e) => { store.unlockAll = e.target.c
 $('#resetBtn').addEventListener('click', () => { $('#resetConfirm').hidden = false; });
 $('#resetNo').addEventListener('click', () => { $('#resetConfirm').hidden = true; });
 $('#resetYes').addEventListener('click', () => {
-  Object.assign(store, { stars: {}, stages: {}, weak: {}, days: {}, medals: [], total: 0 });
+  Object.assign(store, { stars: {}, stages: {}, weak: {}, days: {}, medals: [], total: 0, resume: null });
   save(); $('#resetConfirm').hidden = true; openChapter = null; renderHome();
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#sheetLayer').hidden) closeSheet(); });
