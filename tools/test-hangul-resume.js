@@ -25,7 +25,7 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
     for (const p of P.slice(1)) await page.mouse.move(...S(p));
     await page.mouse.up(); await page.waitForTimeout(30);
   }
-  const state = () => page.evaluate(() => { const s = window.__d.st; return { mode: s.mode, busy: s.busy, item: s.itemIdx, rep: s.repIdx, unit: s.unitIdx, k: s.strokeIdx, mistakes: s.itemMistakes, units: s.units.length, nItems: s.sess ? s.sess.items.length : 0, reps: s.sess ? window.__d.curReps().length : 0, nStrokes: s.units[s.unitIdx] ? s.units[s.unitIdx].strokes.length : 0 }; });
+  const state = () => page.evaluate(() => { const s = window.__d.st; return { mode: s.mode, busy: s.busy, item: s.itemIdx, rep: s.repIdx, unit: s.unitIdx, k: s.strokeIdx, mistakes: s.itemMistakes, units: s.units.length, nItems: s.sess ? s.sess.items.length : 0, reps: s.sess ? window.__d.curReps().length : 0, nStrokes: s.units[s.unitIdx] ? s.units[s.unitIdx].strokes.length : 0, q: s.sess ? s.sess.items[s.itemIdx].q : null }; });
   const strokes = async () => (await page.$$eval('#board g.gl path', (ps) => ps.map((p) => p.getAttribute('d')))).map(parseD);
   async function ready() {
     for (let t = 0; t < 200; t++) {
@@ -37,13 +37,26 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
     }
     throw new Error('never ready');
   }
+
+  // perform the expected action for the current round: draw the stroke, tap it (순서 맞히기) or press its number (몇 번째 획?)
+  async function act(s, strokesNow, off = [0, 0]) {
+    const box = await page.locator('#board').boundingBox();
+    if (s.mode === 'quiz') {
+      const pts = strokesNow[s.k], m = pts[Math.floor(pts.length / 2)];
+      await page.mouse.click(box.x + (m[0] / 100) * box.width, box.y + (m[1] / 100) * box.height);
+      await page.waitForTimeout(40);
+    } else if (s.mode === 'qnum') {
+      await page.click(`#qnumBox .qbtn:nth-child(${(s.q || 0) + 1})`);
+      await page.waitForTimeout(40);
+    } else await draw(strokesNow[s.k], off);
+  }
   // play until stop(state) is true (checked before each stroke) or the session ends
   async function play(stop = () => false) {
     for (let g = 0; g < 600; g++) {
       if ((await ready()) === 'win') return 'win';
       const s = await state();
       if (stop(s)) return 'stopped';
-      await draw((await strokes())[s.k]);
+      await act(s, await strokes());
     }
   }
   const resumeInfo = () => page.evaluate(() => { const r = window.__d.store.resume; return r && { title: r.def.title, item: r.itemIdx, rep: r.repIdx, unit: r.unitIdx, k: r.strokeIdx, m: r.itemMistakes }; });
@@ -64,7 +77,7 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
   const back = await state();
   console.log('   resumed at:', JSON.stringify({ item: back.item, rep: back.rep, k: back.k, mistakes: back.mistakes, mode: back.mode }), '| done strokes on board:', await page.locator('#board g.done path').count(), '| msg:', await page.locator('#msg').textContent());
   await play();
-  console.log('   finished: stars ㄹ =', await page.evaluate(() => window.__d.store.stars['j:ㄹ']), '| resume =', JSON.stringify(await resumeInfo()), '| retry button:', await page.locator('#win .btn.green').textContent().catch(() => 'none'));
+  console.log('   finished: session results =', await page.evaluate(() => JSON.stringify(window.__d.st.sess.items.map((it, i) => it.text + ':' + it.reps.join('+') + '=' + window.__d.st.sess.results[i]))), '| resume =', JSON.stringify(await resumeInfo()), '| retry button:', await page.locator('#win .btn.green').textContent().catch(() => 'none'));
   // retry the wrong letters right away
   await page.click('#win .btn.green'); await page.waitForTimeout(200);
   console.log('   retry session:', await page.locator('#sessTitle').textContent(), '| items:', await page.locator('#items .ichip').allInnerTexts());
@@ -90,9 +103,9 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
   await page.click('.chapter:nth-child(1) .ch-head');
   await page.click('.chapter:nth-child(1) .node[aria-label^="1-4 "]');
   await page.click('#sheet .btn.primary');
-  await play((s) => s.item === s.nItems - 1 && s.rep === s.reps - 1 && s.unit === s.units - 1 && s.k === s.nStrokes - 1);
+  await play((s) => s.item === s.nItems - 1 && s.rep === s.reps - 1 && s.unit === s.units - 1 && (s.mode === 'qnum' || s.k === s.nStrokes - 1));
   ss = await strokes(); const s3 = await state();
-  await draw(ss[s3.k]);
+  await act(s3, ss);
   await page.reload(); await page.waitForTimeout(300);
   console.log('3. after closing mid-celebration: stage 1-4 =', await page.evaluate(() => window.__d.store.stages['1-4']), '| resume =', JSON.stringify(await resumeInfo()), '| home button:', (await page.locator('#continueBtn').innerText()).replace(/\n/g, ' | '));
   console.log('errors:', errors.length ? errors : 'none');

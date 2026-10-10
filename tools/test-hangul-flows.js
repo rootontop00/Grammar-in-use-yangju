@@ -60,7 +60,20 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
     for (const p of P.slice(1)) await page.mouse.move(...S(p));
     await page.mouse.up(); await page.waitForTimeout(30);
   }
-  const state = () => page.evaluate(() => { const s = window.__d.st; return { mode: s.mode, busy: s.busy, item: s.itemIdx, rep: s.repIdx, unit: s.unitIdx, k: s.strokeIdx, sess: !!s.sess }; });
+  const state = () => page.evaluate(() => { const s = window.__d.st; return { mode: s.mode, busy: s.busy, item: s.itemIdx, rep: s.repIdx, unit: s.unitIdx, k: s.strokeIdx, sess: !!s.sess, q: s.sess ? s.sess.items[s.itemIdx].q : null }; });
+
+  // perform the expected action for the current round: draw the stroke, tap it (순서 맞히기) or press its number (몇 번째 획?)
+  async function act(s, strokesNow, off = [0, 0]) {
+    const box = await page.locator('#board').boundingBox();
+    if (s.mode === 'quiz') {
+      const pts = strokesNow[s.k], m = pts[Math.floor(pts.length / 2)];
+      await page.mouse.click(box.x + (m[0] / 100) * box.width, box.y + (m[1] / 100) * box.height);
+      await page.waitForTimeout(40);
+    } else if (s.mode === 'qnum') {
+      await page.click(`#qnumBox .qbtn:nth-child(${(s.q || 0) + 1})`);
+      await page.waitForTimeout(40);
+    } else await draw(strokesNow[s.k], off);
+  }
   const winOpen = () => page.locator('#winLayer').isVisible();
   async function ready() {
     for (let t = 0; t < 200; t++) {
@@ -73,6 +86,7 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
     throw new Error('never ready');
   }
   // completes the whole session; mistakesAt: set of "item:rep" where a reversed stroke is drawn first
+  const modes = {};
   async function playSession(mistakesAt = new Set()) {
     let guard = 0;
     while (guard++ < 800) {
@@ -80,8 +94,9 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
       const s = await state();
       const strokes = (await page.$$eval('#board g.gl path', (ps) => ps.map((p) => p.getAttribute('d')))).map(parseD);
       const tag = `${s.item}:${s.rep}`;
-      if (s.k === 0 && s.unit === 0 && mistakesAt.has(tag)) { mistakesAt.delete(tag); await draw(strokes[0].slice().reverse()); await page.waitForTimeout(60); continue; }
-      await draw(strokes[s.k], [(s.k % 2 ? 1.5 : -1.5), 1.2]);
+      if (s.k === 0 && s.unit === 0 && mistakesAt.has(tag) && ['trace', 'faint', 'ghost'].includes(s.mode)) { mistakesAt.delete(tag); await draw(strokes[0].slice().reverse()); await page.waitForTimeout(60); continue; }
+      modes[s.mode] = (modes[s.mode] || 0) + 1;
+      await act(s, strokes, [(s.k % 2 ? 1.5 : -1.5), 1.2]);
       const after = await state();
       if (after.k === s.k && after.unit === s.unit && after.rep === s.rep && after.item === s.item && !after.busy) throw new Error('stroke rejected at ' + JSON.stringify(s) + ' msg=' + await page.locator('#msg').textContent());
     }
@@ -110,6 +125,9 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
   if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'n-home2.png'), fullPage: true });
 
   // ---------- C. review ----------
+  // make sure there is something to review (reminders inside lessons may already have cleared the slips)
+  await page.evaluate(() => { const st = window.__d.store; if (!Object.keys(st.weak).length) { st.weak['j:ㄹ'] = 2; st.weak['j:ㅁ'] = 1; } });
+  await page.click('#freeBtn'); await page.click('#freeBack');
   await page.click('#reviewBtn');
   await playSession();
   console.log('C. review done, weak now:', JSON.stringify(await page.evaluate(() => window.__d.store.weak)));
@@ -162,6 +180,7 @@ function resample(p, sp) { const out = [p[0]]; let acc = 0; for (let i = 1; i < 
   await page.fill('#nameInput', 'abc');
   await page.click('.name-form button');
   console.log('E. invalid name msg:', await page.locator('.err').textContent());
+  console.log('modes used:', JSON.stringify(modes));
   console.log('scrollWidth:', await page.evaluate(() => document.documentElement.scrollWidth));
   console.log('errors:', errors.length ? errors : 'none');
   await browser.close();
