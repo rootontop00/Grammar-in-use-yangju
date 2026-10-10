@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="예비 초등학생을 위한 한글 자음·모음·글자 획순 따라 쓰기 연습">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2B8A5F">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="획순 공책">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));</script>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>한글 획순 공책</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
+<style>
+/* Layout: one page of a 쓰기 공책 — a stage map for the journey, a gridded writing square as the hero of each lesson.
+   Light = notebook paper with green grid lines. Dark = chalkboard with chalk colours. */
+:root {
+  --bg: #ECF4EE;
+  --bg-line: #DFEBE3;
+  --paper: #FFFEF8;
+  --line: #9FCDB4;
+  --frame: #3F8F69;
+  --ink: #1C2B33;
+  --muted: #56675F;
+  --accent: #2B8A5F;
+  --accent-deep: #1F6A48;
+  --accent-soft: #DDF0E5;
+  --accent-ink: #FFFFFF;
+  --sun: #FFC53D;
+  --sun-deep: #E0A000;
+  --sun-soft: #FFF3CF;
+  --sun-ink: #4A3200;
+  --warn: #DC3F44;
+  --guide: #DCE7E0;
+  --step-done: #9AABA3;
+  --pencil: #3A4650;
+  --chip: #FFFFFF;
+  --chip-line: #CFE1D6;
+  --track: #E1EAE4;
+  --board-shadow: #CFE0D5;
+  --badge-ink: #FFFFFF;
+  --scrim: rgba(236, 244, 238, .78);
+  --face: #2A2622;
+  --eraser: #F48FB1;
+  --ferrule: #B9C2C8;
+  --wood: #F2CF9C;
+  --blush: #FF8A8A;
+  --s1: #E8483F; --s2: #F08A00; --s3: #23A15A; --s4: #2B74D8;
+  --s5: #8D4FD8; --s6: #D9468F; --s7: #0E9A9E; --s8: #8A6248;
+  --r-cho: #E8483F; --r-jung: #2B74D8; --r-jong: #23A15A;
+  --font-display: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-body: 'Gowun Dodum', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11201A; --bg-line: #16281F; --paper: #1D392D; --line: #3A6352; --frame: #79C29C;
+    --ink: #ECF3EE; --muted: #A7BBB0; --accent: #5BC994; --accent-deep: #3E9E70; --accent-soft: #1F3D30;
+    --accent-ink: #0C1C14; --sun: #FFD15C; --sun-deep: #D9A92E; --sun-soft: #3A3420; --sun-ink: #2B1F00;
+    --warn: #FF7074; --guide: #2F5444; --step-done: #6F8C7E; --pencil: #F2F2EA; --chip: #182D24;
+    --chip-line: #2D4A3D; --track: #29443A; --board-shadow: #0B1611; --badge-ink: #10231A; --scrim: rgba(17, 32, 26, .8);
+    --s1: #FF8A84; --s2: #FFBE5C; --s3: #7FDB9C; --s4: #82B8FF; --s5: #C7A0FF; --s6: #FF8FC8; --s7: #63D8DB; --s8: #DDB892;
+    --r-cho: #FF8A84; --r-jung: #82B8FF; --r-jong: #7FDB9C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11201A; --bg-line: #16281F; --paper: #1D392D; --line: #3A6352; --frame: #79C29C;
+  --ink: #ECF3EE; --muted: #A7BBB0; --accent: #5BC994; --accent-deep: #3E9E70; --accent-soft: #1F3D30;
+  --accent-ink: #0C1C14; --sun: #FFD15C; --sun-deep: #D9A92E; --sun-soft: #3A3420; --sun-ink: #2B1F00;
+  --warn: #FF7074; --guide: #2F5444; --step-done: #6F8C7E; --pencil: #F2F2EA; --chip: #182D24;
+  --chip-line: #2D4A3D; --track: #29443A; --board-shadow: #0B1611; --badge-ink: #10231A; --scrim: rgba(17, 32, 26, .8);
+  --s1: #FF8A84; --s2: #FFBE5C; --s3: #7FDB9C; --s4: #82B8FF; --s5: #C7A0FF; --s6: #FF8FC8; --s7: #63D8DB; --s8: #DDB892;
+  --r-cho: #FF8A84; --r-jung: #82B8FF; --r-jong: #7FDB9C;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--bg-line) 1px, transparent 1px);
+  background-size: 100% 34px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.app { max-width: 1060px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 48px; }
+
+/* ---------- shared ---------- */
+.star-pill {
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  background: var(--chip); border: 2px solid var(--chip-line); border-radius: 999px;
+  padding: 5px 14px 5px 9px; font-family: var(--font-display); font-size: 1.25rem; font-variant-numeric: tabular-nums;
+}
+.star-pill svg { width: 24px; height: 24px; }
+.ico-star { fill: var(--sun); stroke: var(--sun-deep); stroke-width: 1.2; stroke-linejoin: round; }
+.ico-star.off { fill: var(--track); stroke: var(--chip-line); }
+.btn {
+  min-height: 56px; padding: 0 18px; border-radius: 16px; cursor: pointer;
+  border: 2px solid var(--chip-line); border-bottom-width: 5px; background: var(--chip);
+  font-family: var(--font-display); font-size: 1.15rem; line-height: 1.2;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  transition: transform .08s;
+}
+.btn:active { transform: translateY(2px); border-bottom-width: 3px; }
+.btn svg { width: 22px; height: 22px; flex: none; }
+.btn.primary { background: var(--sun); border-color: var(--sun-deep); color: var(--sun-ink); }
+.btn.green { background: var(--accent); border-color: var(--accent-deep); color: var(--accent-ink); }
+.btn.small { min-height: 44px; font-size: 1rem; padding: 0 14px; border-bottom-width: 4px; }
+.icon-btn {
+  width: 50px; height: 50px; flex: none; border-radius: 15px; cursor: pointer;
+  border: 2px solid var(--chip-line); border-bottom-width: 4px; background: var(--chip);
+  display: grid; place-items: center;
+}
+.icon-btn svg { width: 24px; height: 24px; }
+.mascot { width: 54px; height: 54px; flex: none; }
+.mascot.small { width: 46px; height: 46px; }
+.mascot.hop { animation: hop .5s ease-out; }
+.mascot.sad { animation: shake .4s; }
+.bar { display: flex; align-items: center; gap: 10px; }
+.bar h2 { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.section-title { font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; margin: 28px 0 10px; }
+.card { background: var(--chip); border: 2px solid var(--chip-line); border-radius: 22px; padding: 16px; }
+.meter { height: 10px; border-radius: 99px; background: var(--track); overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--sun); border-radius: inherit; transition: width .6s ease; }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--track); }
+.dots i.f { background: var(--sun); }
+.mini-stars { display: inline-flex; gap: 1px; }
+.mini-stars svg { width: 16px; height: 16px; }
+
+/* ---------- home ---------- */
+.home-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.8rem, 6vw, 2.5rem); line-height: 1.1; margin: 0; }
+.brand p { margin: 2px 0 0; color: var(--muted); }
+.top-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); margin-top: 18px; }
+@media (min-width: 760px) { .top-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); } }
+.level-card { display: flex; gap: 14px; align-items: center; }
+.level-badge { width: 74px; height: 74px; flex: none; border-radius: 22px; background: var(--sun-soft); border: 3px solid var(--sun-deep); display: grid; place-items: center; text-align: center; font-family: var(--font-display); line-height: 1; }
+.level-badge small { display: block; font-size: .85rem; color: var(--muted); }
+.level-badge b { font-weight: 400; font-size: 2rem; }
+.level-body { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.level-body h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; }
+.level-body p { margin: 0; color: var(--muted); font-size: .95rem; }
+.today { display: grid; gap: 10px; }
+.today-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.today h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; }
+.today-count { font-family: var(--font-display); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.today-count small { color: var(--muted); font-size: 1rem; }
+.week { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.day { display: grid; justify-items: center; gap: 2px; font-size: .78rem; color: var(--muted); }
+.day i { width: 26px; height: 26px; border-radius: 50%; border: 2px dashed var(--chip-line); display: grid; place-items: center; font-style: normal; }
+.day.some i { border-style: solid; border-color: var(--sun); background: var(--sun-soft); }
+.day.goal i { border-style: solid; border-color: var(--sun-deep); background: var(--sun); color: var(--sun-ink); }
+.day.today-d { color: var(--ink); font-weight: 700; }
+.streak { margin-left: auto; font-family: var(--font-display); font-size: 1.05rem; background: var(--accent-soft); border: 2px solid var(--accent); border-radius: 999px; padding: 2px 12px; }
+.go-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 8px; }
+.go-row .btn { min-height: 64px; font-size: 1.2rem; }
+.go-row .btn span { display: block; font-size: .9rem; opacity: .85; }
+.free-btn { width: 100%; margin-top: 8px; }
+
+.chapters { display: grid; gap: 14px; }
+.chapter { background: var(--chip); border: 2px solid var(--chip-line); border-radius: 22px; overflow: hidden; }
+.ch-head { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: transparent; border: 0; cursor: pointer; text-align: left; }
+.emblem { width: 54px; height: 54px; border-radius: 17px; flex: none; display: grid; place-items: center; font-family: var(--font-display); font-size: 1.9rem; background: var(--c); color: var(--badge-ink); }
+.chapter.locked .emblem { background: var(--track); color: var(--muted); }
+.ch-text { flex: 1; min-width: 0; }
+.ch-text h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; line-height: 1.2; }
+.ch-text p { margin: 2px 0 6px; color: var(--muted); font-size: .9rem; }
+.ch-text .meter { height: 8px; }
+.ch-text .meter i { background: var(--c); }
+.chev { width: 26px; height: 26px; flex: none; color: var(--muted); transition: transform .2s; }
+.chapter.open .chev { transform: rotate(180deg); }
+.road { position: relative; margin: 0 8px 14px; }
+.trail { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.trail path { fill: none; stroke: var(--chip-line); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1 13; vector-effect: non-scaling-stroke; }
+.node { position: absolute; width: 128px; transform: translate(-50%, -36px); display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: 0; padding: 0; cursor: pointer; text-align: center; }
+.disc {
+  position: relative; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--chip); border: 3px solid var(--chip-line); border-bottom-width: 7px;
+  font-family: var(--font-display); font-size: 1.3rem; color: var(--ink);
+}
+.node.done .disc { background: color-mix(in srgb, var(--c) 20%, var(--chip)); border-color: var(--c); }
+.node.cur .disc { background: var(--sun); border-color: var(--sun-deep); color: var(--sun-ink); }
+.node.cur .disc::after { content: ''; position: absolute; inset: -10px; border-radius: 50%; border: 3px solid var(--sun); animation: ring 1.4s ease-out infinite; }
+.node.locked .disc { border-style: dashed; border-bottom-width: 3px; color: var(--muted); background: transparent; }
+.node.test .disc { border-radius: 24px; }
+.disc svg { width: 28px; height: 28px; }
+.node .lab { font-family: var(--font-display); font-size: 1rem; line-height: 1.15; }
+.node.locked .lab { color: var(--muted); }
+.node .sub { font-size: .9rem; color: var(--muted); line-height: 1.2; }
+.flag { position: absolute; top: -26px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: var(--font-display); font-size: .85rem; background: var(--ink); color: var(--bg); border-radius: 999px; padding: 1px 9px; }
+
+.shelf { display: flex; flex-wrap: wrap; gap: 8px; }
+.medal { width: 64px; display: grid; justify-items: center; gap: 2px; font-size: .8rem; color: var(--muted); text-align: center; }
+.medal i { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-family: var(--font-display); font-size: 1.6rem; border: 3px dashed var(--chip-line); color: var(--muted); }
+.medal.got i { border: 4px solid var(--sun-deep); background: var(--c); color: var(--badge-ink); box-shadow: 0 0 0 3px var(--sun) inset; }
+.medal.got { color: var(--ink); }
+.sticker { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-size: 1.9rem; background: var(--sun-soft); border: 2px solid var(--sun); }
+.sticker.locked { background: transparent; border: 2px dashed var(--chip-line); color: var(--muted); font-size: 1.1rem; font-family: var(--font-display); }
+.hint-line { margin: 10px 0 0; color: var(--muted); }
+
+.parents { margin-top: 26px; background: var(--chip); border: 2px solid var(--chip-line); border-radius: 20px; padding: 4px 16px; }
+.parents summary { cursor: pointer; font-family: var(--font-display); font-size: 1.2rem; padding: 10px 0; }
+.parents-body { padding-bottom: 14px; max-width: 70ch; }
+.parents-body h4 { font-family: var(--font-display); font-weight: 400; font-size: 1.1rem; margin: 16px 0 4px; }
+.parents-body ol, .parents-body ul { margin: 0; padding-left: 1.3em; }
+.parents-body li { margin: 3px 0; }
+.parents-body p { margin: 6px 0; }
+.setting-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.seg { display: inline-flex; border: 2px solid var(--chip-line); border-radius: 14px; overflow: hidden; }
+.seg button { border: 0; background: var(--chip); padding: 8px 14px; cursor: pointer; font-family: var(--font-display); font-size: 1rem; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.check input { width: 22px; height: 22px; accent-color: var(--accent); }
+
+/* ---------- free practice ---------- */
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding: 14px 2px 12px; scrollbar-width: thin; }
+.tab { flex: none; min-height: 48px; padding: 0 16px; border-radius: 14px; border: 2px solid var(--chip-line); border-bottom-width: 4px; background: var(--chip); font-family: var(--font-display); font-size: 1.1rem; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent-deep); color: var(--accent-ink); }
+.free-body { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+.group-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.group-head h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  min-width: 58px; min-height: 62px; padding: 4px 12px; border-radius: 16px; cursor: pointer;
+  border: 2px solid var(--chip-line); border-bottom-width: 4px; background: var(--chip);
+  font-family: var(--font-display); font-size: 1.6rem; line-height: 1.1;
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.chip.word { font-size: 1.3rem; }
+.chip.sentence { font-size: 1.15rem; }
+.chip.sel { border-color: var(--accent); background: var(--accent-soft); }
+.table-wrap { overflow-x: auto; }
+.syl-table { border-collapse: separate; border-spacing: 4px; margin: 0 auto; }
+.syl-table th { font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; color: var(--muted); min-width: 26px; }
+.syl-table td button { width: 100%; min-width: 34px; height: 42px; border-radius: 10px; border: 2px solid var(--chip-line); background: var(--chip); font-family: var(--font-display); font-size: 1.3rem; cursor: pointer; padding: 0; }
+.syl-table td button.has { background: var(--sun-soft); border-color: var(--sun); }
+.builder { display: grid; gap: 12px; }
+.builder-top { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.builder-top .glyph { width: 120px; height: 120px; flex: none; }
+.builder .chips .chip { min-width: 46px; min-height: 48px; font-size: 1.35rem; padding: 2px 8px; }
+.builder h4 { margin: 0 0 6px; font-family: var(--font-display); font-weight: 400; font-size: 1.1rem; color: var(--muted); }
+.name-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.name-form input {
+  flex: 1 1 160px; width: 100%; min-width: 0; min-height: 56px; border-radius: 16px; border: 2px solid var(--chip-line);
+  background: var(--paper); color: var(--ink); padding: 0 16px; font-family: var(--font-display); font-size: 1.4rem;
+}
+.err { margin: 8px 0 0; color: var(--warn); font-weight: 700; }
+.name-chip { display: inline-flex; align-items: stretch; border: 2px solid var(--chip-line); border-radius: 14px; overflow: hidden; background: var(--paper); }
+.name-chip button { border: 0; background: transparent; cursor: pointer; }
+.name-chip .go { font-family: var(--font-display); font-size: 1.3rem; padding: 6px 12px; display: flex; align-items: center; gap: 8px; }
+.name-chip .x { padding: 0 12px; color: var(--muted); border-left: 2px solid var(--chip-line); font-size: 1.2rem; }
+
+/* ---------- practice ---------- */
+.items { display: flex; gap: 6px; overflow-x: auto; padding: 12px 2px 10px; scrollbar-width: thin; }
+.ichip {
+  flex: none; min-width: 52px; height: 58px; padding: 0 10px; border-radius: 14px;
+  border: 2px solid var(--chip-line); background: var(--chip); color: var(--muted);
+  font-family: var(--font-display); font-size: 1.4rem; line-height: 1.05;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+}
+.ichip.long { font-size: 1.1rem; }
+.ichip.on { border-color: var(--accent); border-width: 3px; color: var(--ink); background: var(--accent-soft); }
+.ichip.done { color: var(--ink); }
+.ichip .mini-stars svg { width: 12px; height: 12px; }
+.practice-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); justify-items: center; }
+@media (min-width: 880px) {
+  .practice-grid { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; justify-items: stretch; }
+  .board-col { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 10px); }
+}
+.board-col { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.word-line { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.syl { min-width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--chip-line); background: var(--chip); font-family: var(--font-display); font-size: 1.6rem; display: grid; place-items: center; color: var(--muted); }
+.syl.done { color: var(--ink); background: var(--accent-soft); }
+.syl.on { border-color: var(--accent); color: var(--ink); border-width: 3px; }
+.word-line { column-gap: 14px; row-gap: 6px; }
+.wgroup { display: inline-flex; gap: 4px; }
+.word-line.compact .syl { min-width: 38px; height: 42px; font-size: 1.3rem; border-radius: 10px; }
+.board-wrap { position: relative; width: min(100%, 560px, calc(100vh - 250px)); min-width: 260px; max-width: 100%; aspect-ratio: 1 / 1; }
+#board { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 16px; box-shadow: 0 6px 0 var(--board-shadow); cursor: crosshair; }
+#board.ghost .gl path { opacity: .4; }
+.star-toast { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.star-toast > div { background: var(--chip); border: 3px solid var(--sun-deep); border-radius: 24px; padding: 14px 20px; text-align: center; box-shadow: 0 6px 0 var(--board-shadow); animation: rise .3s ease-out; }
+.star-toast .row { display: flex; gap: 4px; justify-content: center; }
+.star-toast svg { width: 54px; height: 54px; }
+.star-toast p { margin: 4px 0 0; font-family: var(--font-display); font-size: 1.3rem; }
+.side-col { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 12px; }
+.pips { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+.pip { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; border-radius: 16px; border: 2px solid var(--chip-line); background: var(--chip); font-family: var(--font-display); font-size: 1rem; color: var(--muted); }
+.pip b { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-weight: 400; font-size: 1.15rem; border: 2px dashed var(--chip-line); }
+.pip.on { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); }
+.pip.on b { border-style: solid; border-color: var(--accent); }
+.pip.done { color: var(--ink); }
+.pip.done b { border: 0; background: var(--accent); color: var(--accent-ink); }
+.info { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.say-btn { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-height: 52px; border: 2px solid var(--chip-line); border-bottom-width: 4px; background: var(--chip); border-radius: 16px; padding: 0 14px; font-family: var(--font-display); font-size: 1.5rem; }
+.say-btn svg { width: 22px; height: 22px; color: var(--accent); }
+.count { font-family: var(--font-display); font-size: 1.1rem; background: var(--sun-soft); border: 2px solid var(--sun); border-radius: 999px; padding: 2px 12px; }
+.tip { margin: 0; color: var(--muted); font-size: 1rem; }
+.order-line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-family: var(--font-display); font-size: 1.05rem; color: var(--muted); }
+.order-line .j { font-size: 1.45rem; padding: 0 8px; border-radius: 10px; border: 2px solid currentColor; line-height: 1.3; }
+.bubble-row { display: flex; gap: 8px; align-items: flex-start; }
+.bubble { flex: 1; min-width: 0; margin: 0; background: var(--chip); border: 2px solid var(--chip-line); border-radius: 18px; padding: 10px 14px; font-family: var(--font-display); font-size: 1.2rem; line-height: 1.4; min-height: 52px; }
+.bubble.good { border-color: var(--accent); }
+.bubble.bad { border-color: var(--warn); animation: shake .4s; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.steps-box { background: var(--chip); border: 2px solid var(--chip-line); border-radius: 18px; padding: 10px 12px 12px; }
+.steps-box h4 { margin: 0 0 6px; font-family: var(--font-display); font-weight: 400; font-size: 1.05rem; color: var(--muted); }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; }
+.step { width: 58px; height: 58px; }
+
+/* ---------- svg ---------- */
+.gl path, .done path, .anim path, .ink, .hint path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.gl path { stroke: var(--guide); }
+.ink { stroke: var(--pencil); opacity: .9; }
+.ink.bad { stroke: var(--warn); opacity: 0; transition: opacity .7s ease .25s; }
+.hint-glow { opacity: .3; }
+.hint-march { stroke-dasharray: .01 4.4; animation: march .65s linear infinite; }
+.pulse { fill: none; stroke-width: 1.3; transform-box: fill-box; transform-origin: center; animation: pulse 1.25s ease-out infinite; }
+.badge-num { fill: var(--badge-ink); font-family: var(--font-display); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.pop { transform-box: fill-box; transform-origin: center; animation: pop .38s ease-out; }
+
+@keyframes march { to { stroke-dashoffset: -4.41; } }
+@keyframes pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(2.1); opacity: 0; } }
+@keyframes ring { from { transform: scale(.9); opacity: .9; } to { transform: scale(1.25); opacity: 0; } }
+@keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-3px); } }
+@keyframes hop { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-9px); } }
+@keyframes rise { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ---------- overlays ---------- */
+.overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: var(--scrim); overflow-y: auto; }
+.sheet { width: min(100%, 460px); background: var(--chip); border: 3px solid var(--chip-line); border-radius: 26px; padding: 20px 18px 18px; box-shadow: 0 8px 0 var(--board-shadow); animation: rise .25s ease-out; display: grid; gap: 12px; }
+.sheet.win { border-color: var(--sun-deep); text-align: center; }
+.sheet h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.9rem; line-height: 1.2; }
+.sheet .kicker { font-family: var(--font-display); font-size: 1rem; color: var(--muted); }
+.sheet p { margin: 0; color: var(--muted); }
+.preview { display: flex; flex-wrap: wrap; gap: 6px; }
+.preview .glyph { width: 64px; height: 64px; }
+.preview .wchip { font-family: var(--font-display); font-size: 1.35rem; border: 2px solid var(--chip-line); border-radius: 12px; padding: 4px 12px; background: var(--paper); }
+.big-stars { display: flex; justify-content: center; gap: 6px; }
+.big-stars svg { width: 62px; height: 62px; }
+.big-stars svg.on { animation: rise .4s ease-out both; }
+.results { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.res { display: grid; justify-items: center; gap: 2px; border: 2px solid var(--chip-line); border-radius: 12px; padding: 4px 10px; font-family: var(--font-display); font-size: 1.25rem; background: var(--paper); }
+.res .mini-stars svg { width: 13px; height: 13px; }
+.banner { display: flex; align-items: center; gap: 10px; text-align: left; background: var(--sun-soft); border: 2px solid var(--sun); border-radius: 16px; padding: 8px 12px; font-family: var(--font-display); font-size: 1.1rem; }
+.banner .em { font-size: 2rem; line-height: 1; flex: none; width: 44px; height: 44px; display: grid; place-items: center; }
+.banner .em.medal-em { border-radius: 50%; background: var(--c); color: var(--badge-ink); font-size: 1.4rem; border: 3px solid var(--sun-deep); }
+.gain { font-family: var(--font-display); font-size: 1.3rem; }
+.sheet-actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); z-index: 40; background: var(--ink); color: var(--bg); font-family: var(--font-display); font-size: 1.1rem; padding: 10px 18px; border-radius: 999px; max-width: calc(100% - 32px); text-align: center; animation: rise .2s ease-out; }
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hint-march, .pulse, .bubble.bad, .mascot.hop, .mascot.sad, .pop, .sheet, .big-stars svg.on, .node.cur .disc::after, .star-toast > div, .toast { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-star" viewBox="0 0 24 24"><path class="ico-star" d="M12 2.6l2.85 5.9 6.45.92-4.68 4.53 1.12 6.42L12 17.33l-5.74 3.04 1.12-6.42L2.7 9.42l6.45-.92z"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 010 6M18 6.5a7.5 7.5 0 010 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></symbol>
+    <symbol id="i-again" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M4 3.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 018 0v2.5" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 01-10 0z" fill="currentColor"/><path d="M7 6H4.5a3 3 0 003 4M17 6h2.5a3 3 0 01-3 4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 14h3v3h-3zM8 18h8v2.5H8z" fill="currentColor"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 64 64">
+      <g transform="rotate(-16 32 34)">
+        <rect x="20" y="4" width="24" height="10" rx="4" fill="var(--eraser)"/>
+        <rect x="20" y="13" width="24" height="5" fill="var(--ferrule)"/>
+        <rect x="20" y="18" width="24" height="28" fill="var(--sun)"/>
+        <rect x="28" y="18" width="8" height="28" fill="var(--sun-deep)" opacity=".35"/>
+        <path d="M20 46h24L32 61z" fill="var(--wood)"/>
+        <path d="M28.6 56.7h6.8L32 61z" fill="var(--face)"/>
+        <circle cx="27" cy="29" r="2.5" fill="var(--face)"/>
+        <circle cx="37" cy="29" r="2.5" fill="var(--face)"/>
+        <path d="M27.5 35.5q4.5 4 9 0" fill="none" stroke="var(--face)" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="23.5" cy="34" r="2" fill="var(--blush)" opacity=".75"/>
+        <circle cx="40.5" cy="34" r="2" fill="var(--blush)" opacity=".75"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <!-- ================= HOME (stage map) ================= -->
+  <section id="home">
+    <header class="home-head">
+      <div class="brand">
+        <svg class="mascot" aria-hidden="true"><use href="#i-pencil"/></svg>
+        <div>
+          <h1>한글 획순 공책</h1>
+          <p>단계를 하나씩 깨면서 바르게 써 봐요!</p>
+        </div>
+      </div>
+      <div class="star-pill" title="모은 별"><svg aria-hidden="true"><use href="#i-star"/></svg><span id="homeStars">0</span></div>
+    </header>
+
+    <div class="top-grid">
+      <section class="card level-card" aria-label="내 레벨">
+        <div class="level-badge"><div><small>레벨</small><b id="lvNum">1</b></div></div>
+        <div class="level-body">
+          <h3 id="lvName">새싹 연필</h3>
+          <div class="meter"><i id="lvBar" style="width:0%"></i></div>
+          <p id="lvNext">다음 레벨까지 별 15개</p>
+        </div>
+      </section>
+      <section class="card today" aria-label="오늘의 연습">
+        <div class="today-row">
+          <h3>오늘의 연습</h3>
+          <div class="today-count"><span id="todayN">0</span> <small>/ <span id="todayGoal">20</span>글자</small></div>
+        </div>
+        <div class="meter"><i id="todayBar" style="width:0%"></i></div>
+        <div class="week" id="week"></div>
+        <div class="go-row">
+          <button class="btn primary" id="continueBtn" type="button"></button>
+          <button class="btn" id="reviewBtn" type="button"></button>
+        </div>
+      </section>
+    </div>
+    <button class="btn green free-btn" id="freeBtn" type="button">자유 연습 · 음절표, 글자 만들기, 낱말, 문장, 내 이름</button>
+
+    <h2 class="section-title">획순 여행 지도</h2>
+    <div class="chapters" id="chapters"></div>
+
+    <h2 class="section-title">메달과 스티커</h2>
+    <section class="card">
+      <div class="shelf" id="medals"></div>
+      <div class="shelf" id="stickers" style="margin-top:12px"></div>
+      <p class="hint-line" id="stickerNext"></p>
+    </section>
+
+    <details class="parents">
+      <summary>부모님께 · 이렇게 연습해요</summary>
+      <div class="parents-body">
+        <h4>한 글자를 세 번 써요</h4>
+        <ol>
+          <li><b>보기</b> — 처음 나오는 글자는 획이 하나씩 그려지는 것을 먼저 봐요.</li>
+          <li><b>따라 쓰기</b> — 번호 점과 화살표를 보며 써요. 이때 틀린 것은 별에 영향이 없어요.</li>
+          <li><b>흐린 글씨</b> — 번호와 화살표 없이 써요. 틀리면 그 획만 힌트가 나와요.</li>
+          <li><b>혼자 쓰기</b> — 아주 흐린 글씨 위에 순서를 기억해서 써요.</li>
+        </ol>
+        <p>흐린 글씨와 혼자 쓰기에서 하나도 안 틀리면 별 3개, 1~2번 틀리면 별 2개예요. 별은 연습할 때마다 쌓여서 레벨과 스티커가 올라가요.</p>
+        <h4>단계와 복습</h4>
+        <ul>
+          <li>지도는 자음 → 모음 → 글자 → 받침 → 낱말 → 문장 순서로 62단계예요. 한 단계는 3~5분 정도 걸려요.</li>
+          <li>장마다 끝에 <b>시험</b>이 있어요. 아주 흐린 글씨로 섞어서 써요. 한 장을 다 깨면 메달을 받아요.</li>
+          <li>틀린 글자는 <b>복습</b>에 모여요. 실수 없이 쓰면 복습 목록에서 빠져요.</li>
+          <li><b>자유 연습</b>에서는 단계와 상관없이 음절표 140자, 글자 만들기(모든 글자), 낱말 147개, 문장 18개, 아이 이름을 쓸 수 있어요.</li>
+        </ul>
+        <h4>획순의 기본 원칙</h4>
+        <ul>
+          <li>위에서 아래로, 왼쪽에서 오른쪽으로 써요.</li>
+          <li>가로획은 왼쪽 → 오른쪽, 세로획은 위 → 아래로 그어요.</li>
+          <li>ㅇ은 맨 위에서 시작해 왼쪽(시계 반대 방향)으로 돌려요.</li>
+          <li>ㄱ, ㄴ처럼 꺾이는 획은 한 번에 써요. ㄹ은 세 번, ㅁ은 세 번, ㅈ은 두 번에 나눠 써요.</li>
+          <li>글자는 첫소리(자음) → 가운데소리(모음) → 받침 순서로 써요.</li>
+        </ul>
+        <h4>설정</h4>
+        <div class="setting-row">하루 목표
+          <span class="seg" id="goalSeg">
+            <button type="button" data-goal="10" aria-pressed="false">10글자</button>
+            <button type="button" data-goal="20" aria-pressed="false">20글자</button>
+            <button type="button" data-goal="30" aria-pressed="false">30글자</button>
+          </span>
+        </div>
+        <div class="setting-row"><label class="check"><input type="checkbox" id="unlockAll"> 모든 단계 열기 (순서와 상관없이 고르기)</label></div>
+        <div class="setting-row">
+          <button class="btn small" id="resetBtn" type="button">기록 지우기</button>
+          <span id="resetConfirm" hidden>정말 지울까요?
+            <button class="btn small" id="resetYes" type="button">지우기</button>
+            <button class="btn small" id="resetNo" type="button">그대로 두기</button>
+          </span>
+        </div>
+        <p>획순은 초등 국어 교과서의 바른 글씨 쓰기 원칙을 따랐어요. 교재에 따라 글자 모양은 조금씩 다를 수 있어요. 기록은 이 기기의 브라우저에만 저장돼요.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ================= FREE PRACTICE ================= -->
+  <section id="free" hidden>
+    <header class="bar">
+      <button class="icon-btn" id="freeBack" type="button" aria-label="지도로"><svg aria-hidden="true"><use href="#i-back"/></svg></button>
+      <h2>자유 연습</h2>
+      <div class="star-pill" title="모은 별"><svg aria-hidden="true"><use href="#i-star"/></svg><span id="freeStars">0</span></div>
+    </header>
+    <nav class="tabs" id="freeTabs" role="tablist" aria-label="연습 종류"></nav>
+    <div class="free-body" id="freeBody"></div>
+  </section>
+
+  <!-- ================= PRACTICE ================= -->
+  <section id="practice" hidden>
+    <header class="bar">
+      <button class="icon-btn" id="backBtn" type="button" aria-label="그만하기"><svg aria-hidden="true"><use href="#i-back"/></svg></button>
+      <h2 id="sessTitle">1-1 꺾어 쓰기</h2>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="소리 끄기"><svg aria-hidden="true"><use id="soundUse" href="#i-sound"/></svg></button>
+      <div class="star-pill" title="모은 별"><svg aria-hidden="true"><use href="#i-star"/></svg><span id="barStars">0</span></div>
+    </header>
+    <div class="items" id="items" aria-label="이번 단계 글자"></div>
+
+    <div class="practice-grid">
+      <div class="board-col">
+        <div class="word-line" id="wordLine" hidden></div>
+        <div class="board-wrap">
+          <svg id="board" viewBox="0 0 100 100" role="img" aria-label="글씨 쓰는 칸"></svg>
+          <div class="star-toast" id="starToast" hidden></div>
+        </div>
+      </div>
+      <div class="side-col">
+        <div class="pips" id="pips" aria-label="쓰기 횟수"></div>
+        <div class="info">
+          <button class="say-btn" id="sayBtn" type="button"><span id="itemName">ㄱ</span><svg aria-hidden="true"><use href="#i-sound"/></svg></button>
+          <span class="count" id="strokeCount">1획</span>
+        </div>
+        <div id="tipBox"></div>
+        <div class="bubble-row">
+          <svg class="mascot small" id="buddy" aria-hidden="true"><use href="#i-pencil"/></svg>
+          <p class="bubble" id="msg" aria-live="polite"></p>
+        </div>
+        <div class="steps-box" id="stepsBox" hidden>
+          <h4>획순 표</h4>
+          <div class="steps" id="steps"></div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="watchBtn" type="button"><svg aria-hidden="true"><use href="#i-eye"/></svg>획순 보기</button>
+          <button class="btn" id="againBtn" type="button"><svg aria-hidden="true"><use href="#i-again"/></svg>다시 쓰기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="sheetLayer" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="overlay" id="winLayer" hidden><div class="sheet win" id="win" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+<canvas id="confetti" hidden></canvas>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= storage ================= */
+const STORE_KEY = 'hangul-stroke-notebook:v1';
+function loadStore() { try { const r = localStorage.getItem(STORE_KEY); return r ? JSON.parse(r) : {}; } catch (e) { return {}; } }
+const store = Object.assign({ stars: {}, names: [], muted: false, stages: {}, weak: {}, days: {}, medals: [], unlockAll: false, goal: 20, total: null }, loadStore());
+if (typeof store.total !== 'number') store.total = Object.values(store.stars).reduce((a, b) => a + b, 0);
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {} }
+function dayKey(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+const todayCount = () => store.days[dayKey()] || 0;
+
+/* ================= helpers ================= */
+const NS = 'http://www.w3.org/2000/svg';
+const $ = (s) => document.querySelector(s);
+function S(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function H(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'text') e.textContent = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (const c of kids) if (c != null && c !== false) e.append(c);
+  return e;
+}
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STAR_D = 'M12 2.6l2.85 5.9 6.45.92-4.68 4.53 1.12 6.42L12 17.33l-5.74 3.04 1.12-6.42L2.7 9.42l6.45-.92z';
+function starSvg(on, cls) { const s = S('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', class: cls || '' }); S('path', { d: STAR_D, class: 'ico-star' + (on ? '' : ' off') }, s); return s; }
+function miniStars(n) { const w = H('span', { class: 'mini-stars', 'aria-label': `별 ${n}개` }); for (let i = 0; i < 3; i++) w.append(starSvg(i < n)); return w; }
+function dots(n) { const d = H('span', { class: 'dots', 'aria-label': `별 ${n}개` }); for (let i = 0; i < 3; i++) d.append(H('i', { class: i < n ? 'f' : '' })); return d; }
+function useIcon(id) { const s = S('svg', { 'aria-hidden': 'true' }); S('use', { href: '#' + id }, s); return s; }
+let toastTimer = 0;
+function toast(text) { const t = $('#toast'); t.textContent = text; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2000); }
+
+/* ================= geometry ================= */
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+function pathLen(p) { let L = 0; for (let i = 1; i < p.length; i++) L += dist(p[i - 1], p[i]); return L; }
+function resample(p, sp) {
+  if (p.length < 2) return p.map((q) => q.slice());
+  const out = [p[0].slice()];
+  let acc = 0;
+  for (let i = 1; i < p.length; i++) {
+    let a = p[i - 1], b = p[i], seg = dist(a, b);
+    while (acc + seg >= sp && seg > 0) {
+      const t = (sp - acc) / seg;
+      const q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      out.push(q); a = q; seg = dist(a, b); acc = 0;
+    }
+    acc += seg;
+  }
+  const last = p[p.length - 1];
+  if (dist(out[out.length - 1], last) > 0.05) out.push(last.slice());
+  return out;
+}
+function partial(p, L) {
+  const out = [p[0]]; let acc = 0;
+  for (let i = 1; i < p.length; i++) {
+    const d = dist(p[i - 1], p[i]);
+    if (acc + d >= L) {
+      const t = d ? (L - acc) / d : 0;
+      out.push([p[i - 1][0] + (p[i][0] - p[i - 1][0]) * t, p[i - 1][1] + (p[i][1] - p[i - 1][1]) * t]);
+      return out;
+    }
+    acc += d; out.push(p[i]);
+  }
+  return out;
+}
+function pointAt(p, L) { const q = partial(p, L); return q[q.length - 1]; }
+function toD(p) { if (p.length === 1) p = [p[0], p[0]]; return 'M' + p.map((q) => q[0].toFixed(2) + ' ' + q[1].toFixed(2)).join(' L'); }
+function bbox(pts) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y] of pts) { if (x < x0) x0 = x; if (y < y0) y0 = y; if (x > x1) x1 = x; if (y > y1) y1 = y; }
+  return [x0, y0, x1, y1];
+}
+/* tiny path language in a 0–100 box: M x y, L x y, Q cx cy x y, O cx cy rx ry (circle from the top, turning left) */
+function parsePath(d) {
+  const tk = d.match(/[A-Z]|-?\d*\.?\d+/g);
+  let i = 0, cmd = null, cur = null; const pts = [];
+  const n = () => parseFloat(tk[i++]);
+  while (i < tk.length) {
+    if (/[A-Z]/.test(tk[i])) cmd = tk[i++];
+    if (cmd === 'M') { cur = [n(), n()]; pts.push(cur); cmd = 'L'; }
+    else if (cmd === 'L') { cur = [n(), n()]; pts.push(cur); }
+    else if (cmd === 'Q') {
+      const c = [n(), n()], e = [n(), n()], s = cur;
+      for (let k = 1; k <= 14; k++) {
+        const t = k / 14, u = 1 - t;
+        pts.push([u * u * s[0] + 2 * u * t * c[0] + t * t * e[0], u * u * s[1] + 2 * u * t * c[1] + t * t * e[1]]);
+      }
+      cur = e;
+    } else if (cmd === 'O') {
+      const cx = n(), cy = n(), rx = n(), ry = n();
+      for (let k = 0; k <= 60; k++) {
+        const a = -Math.PI / 2 - (k / 60) * Math.PI * 2;
+        pts.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]);
+      }
+      cur = pts[pts.length - 1];
+    } else i++;
+  }
+  return pts;
+}
+const mapPts = (pts, r) => pts.map(([x, y]) => [r[0] + (x / 100) * (r[2] - r[0]), r[1] + (y / 100) * (r[3] - r[1])]);
+
+/* ================= letter data ================= */
+/* Each jamo is a list of strokes in writing order, drawn in its own 0–100 box. */
+const J = {
+  'ㄱ': ['M8 12 L90 12 Q91 60 78 93'],
+  'ㄴ': ['M12 8 L12 90 L94 90'],
+  'ㄷ': ['M10 10 L90 10', 'M12 10 L12 90 L94 90'],
+  'ㄹ': ['M10 8 L88 8 L88 48', 'M12 48 L88 48', 'M12 48 L12 92 L94 92'],
+  'ㅁ': ['M12 10 L12 90', 'M12 10 L88 10 L88 90', 'M12 90 L88 90'],
+  'ㅂ': ['M14 6 L14 92', 'M86 6 L86 92', 'M14 48 L86 48', 'M14 92 L86 92'],
+  'ㅅ': ['M52 6 Q46 62 6 94', 'M40 51 Q62 78 94 94'],
+  'ㅇ': ['O50 50 44 44'],
+  'ㅈ': ['M10 12 L84 12 Q58 58 8 92', 'M54 50 Q72 76 94 92'],
+  'ㅊ': ['M50 2 L50 20', 'M10 30 L84 30 Q58 70 8 96', 'M55 63 Q72 84 94 96'],
+  'ㅋ': ['M8 10 L90 10 Q91 60 78 93', 'M10 50 L86 50'],
+  'ㅌ': ['M10 8 L90 8', 'M12 48 L88 48', 'M12 8 L12 92 L94 92'],
+  'ㅍ': ['M6 10 L94 10', 'M32 10 L32 90', 'M68 10 L68 90', 'M4 90 L96 90'],
+  'ㅎ': ['M50 2 L50 18', 'M10 30 L90 30', 'O50 67 32 29'],
+  'ㅏ': ['M35 0 L35 100', 'M35 48 L85 48'],
+  'ㅑ': ['M35 0 L35 100', 'M35 34 L85 34', 'M35 64 L85 64'],
+  'ㅓ': ['M15 48 L65 48', 'M65 0 L65 100'],
+  'ㅕ': ['M15 34 L65 34', 'M15 64 L65 64', 'M65 0 L65 100'],
+  'ㅗ': ['M50 0 L50 100', 'M0 100 L100 100'],
+  'ㅛ': ['M34 0 L34 100', 'M66 0 L66 100', 'M0 100 L100 100'],
+  'ㅜ': ['M0 0 L100 0', 'M50 0 L50 100'],
+  'ㅠ': ['M0 0 L100 0', 'M34 0 L34 100', 'M66 0 L66 100'],
+  'ㅡ': ['M0 50 L100 50'],
+  'ㅣ': ['M50 0 L50 100'],
+  'ㅐ': ['M28 2 L28 98', 'M28 48 L60 48', 'M80 0 L80 100'],
+  'ㅒ': ['M28 2 L28 98', 'M28 34 L60 34', 'M28 62 L60 62', 'M80 0 L80 100'],
+  'ㅔ': ['M6 48 L42 48', 'M42 4 L42 96', 'M80 0 L80 100'],
+  'ㅖ': ['M6 34 L42 34', 'M6 62 L42 62', 'M42 4 L42 96', 'M80 0 L80 100'],
+  'ㅘ': ['M30 52 L30 74', 'M2 74 L60 74', 'M76 0 L76 100', 'M76 46 L98 46'],
+  'ㅙ': ['M24 52 L24 74', 'M2 74 L48 74', 'M62 2 L62 98', 'M62 46 L78 46', 'M90 0 L90 100'],
+  'ㅚ': ['M32 52 L32 74', 'M2 74 L64 74', 'M84 0 L84 100'],
+  'ㅝ': ['M2 56 L58 56', 'M30 56 L30 84', 'M54 44 L74 44', 'M74 0 L74 100'],
+  'ㅞ': ['M2 56 L48 56', 'M25 56 L25 84', 'M48 44 L64 44', 'M64 4 L64 96', 'M90 0 L90 100'],
+  'ㅟ': ['M2 56 L64 56', 'M32 56 L32 84', 'M84 0 L84 100'],
+  'ㅢ': ['M2 66 L66 66', 'M84 0 L84 100'],
+};
+const JP = {}; for (const k in J) JP[k] = J[k].map(parsePath);
+
+const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'.split('');
+const JUNG = 'ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ'.split('');
+const JONG = ['', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+const PAIRS = { 'ㄲ': 'ㄱㄱ', 'ㄸ': 'ㄷㄷ', 'ㅃ': 'ㅂㅂ', 'ㅆ': 'ㅅㅅ', 'ㅉ': 'ㅈㅈ', 'ㄳ': 'ㄱㅅ', 'ㄵ': 'ㄴㅈ', 'ㄶ': 'ㄴㅎ', 'ㄺ': 'ㄹㄱ', 'ㄻ': 'ㄹㅁ', 'ㄼ': 'ㄹㅂ', 'ㄽ': 'ㄹㅅ', 'ㄾ': 'ㄹㅌ', 'ㄿ': 'ㄹㅍ', 'ㅀ': 'ㄹㅎ', 'ㅄ': 'ㅂㅅ' };
+const VCLASS = {};
+'ㅏㅐㅑㅒㅓㅔㅕㅖㅣ'.split('').forEach((v) => (VCLASS[v] = 'V'));
+'ㅗㅛㅜㅠㅡ'.split('').forEach((v) => (VCLASS[v] = 'H'));
+'ㅘㅙㅚㅝㅞㅟㅢ'.split('').forEach((v) => (VCLASS[v] = 'M'));
+const HSUB = { 'ㅗ': 'top', 'ㅛ': 'top', 'ㅜ': 'bot', 'ㅠ': 'bot', 'ㅡ': 'mid' };
+const MSPLIT = { 'ㅘ': 2, 'ㅙ': 2, 'ㅚ': 2, 'ㅝ': 2, 'ㅞ': 2, 'ㅟ': 2, 'ㅢ': 1 };
+const H_SOLO = { 'ㅗ': [14, 32, 86, 66], 'ㅛ': [14, 32, 86, 66], 'ㅜ': [14, 34, 86, 70], 'ㅠ': [14, 34, 86, 70], 'ㅡ': [12, 40, 88, 60] };
+const isCons = (j) => CHO.includes(j) || !!PAIRS[j];
+
+const NAMES = { 'ㄱ': '기역', 'ㄴ': '니은', 'ㄷ': '디귿', 'ㄹ': '리을', 'ㅁ': '미음', 'ㅂ': '비읍', 'ㅅ': '시옷', 'ㅇ': '이응', 'ㅈ': '지읒', 'ㅊ': '치읓', 'ㅋ': '키읔', 'ㅌ': '티읕', 'ㅍ': '피읖', 'ㅎ': '히읗', 'ㄲ': '쌍기역', 'ㄸ': '쌍디귿', 'ㅃ': '쌍비읍', 'ㅆ': '쌍시옷', 'ㅉ': '쌍지읒' };
+function jamoName(j) {
+  if (NAMES[j]) return NAMES[j];
+  const vi = JUNG.indexOf(j);
+  return vi >= 0 ? String.fromCharCode(0xAC00 + 11 * 588 + vi * 28) : j;
+}
+const TIPS = {
+  'ㄱ': '가로로 긋다가 멈추지 말고 꺾어서 아래로!',
+  'ㄴ': '위에서 내려오다가 꺾어서 오른쪽으로!',
+  'ㄷ': '가로 먼저, 그다음 ㄴ을 써요.',
+  'ㄹ': 'ㄹ은 세 번에 나눠 써요. ㄱ → 가로 → ㄴ',
+  'ㅁ': '왼쪽 세로 먼저! 그다음 ㄱ, 마지막에 아래 가로.',
+  'ㅂ': '세로 두 개를 먼저, 가로 두 개는 나중에!',
+  'ㅅ': '왼쪽으로 먼저 내리고, 가운데에서 오른쪽으로.',
+  'ㅇ': '맨 위에서 시작해서 왼쪽으로 동그랗게 돌려요.',
+  'ㅈ': 'ㅈ은 두 번! 가로 긋고 꺾어 내린 다음 오른쪽으로.',
+  'ㅊ': '꼭지 먼저 쓰고, 그다음 ㅈ을 써요.',
+  'ㅋ': 'ㄱ을 먼저 쓰고 가운데 가로를 그어요.',
+  'ㅌ': '가로, 가로, 그리고 ㄴ! ㄴ을 먼저 쓰지 않아요.',
+  'ㅍ': '위 가로 → 왼쪽 세로 → 오른쪽 세로 → 아래 가로',
+  'ㅎ': '꼭지 → 가로 → 동그라미(왼쪽으로 돌려요)',
+  'ㄲ': '왼쪽 ㄱ을 다 쓰고 오른쪽 ㄱ을 써요.',
+  'ㄸ': '왼쪽 ㄷ을 다 쓰고 오른쪽 ㄷ을 써요.',
+  'ㅃ': '왼쪽 ㅂ을 다 쓰고 오른쪽 ㅂ을 써요.',
+  'ㅆ': '왼쪽 ㅅ을 다 쓰고 오른쪽 ㅅ을 써요.',
+  'ㅉ': '왼쪽 ㅈ을 다 쓰고 오른쪽 ㅈ을 써요.',
+  'ㅏ': '긴 세로 먼저, 짧은 가로는 나중에!',
+  'ㅑ': '세로 먼저, 짧은 가로 두 개는 위에서부터.',
+  'ㅓ': '짧은 가로 먼저, 긴 세로는 나중에!',
+  'ㅕ': '짧은 가로 두 개 먼저, 세로는 마지막!',
+  'ㅗ': '짧은 세로 먼저, 긴 가로는 나중에!',
+  'ㅛ': '짧은 세로 둘(왼쪽부터), 긴 가로는 마지막.',
+  'ㅜ': '긴 가로 먼저, 짧은 세로는 나중에!',
+  'ㅠ': '긴 가로 먼저, 짧은 세로 둘은 왼쪽부터.',
+  'ㅡ': '왼쪽에서 오른쪽으로 쭉!',
+  'ㅣ': '위에서 아래로 쭉!',
+  'ㅐ': 'ㅏ를 먼저 다 쓰고, 오른쪽 세로를 그어요.',
+  'ㅒ': 'ㅑ를 먼저 다 쓰고, 오른쪽 세로를 그어요.',
+  'ㅔ': 'ㅓ를 먼저 다 쓰고, 오른쪽 세로를 그어요.',
+  'ㅖ': 'ㅕ를 먼저 다 쓰고, 오른쪽 세로를 그어요.',
+  'ㅘ': 'ㅗ를 먼저 쓰고, 그다음 ㅏ!',
+  'ㅙ': 'ㅗ를 먼저 쓰고, 그다음 ㅐ!',
+  'ㅚ': 'ㅗ를 먼저 쓰고, 그다음 ㅣ!',
+  'ㅝ': 'ㅜ를 먼저 쓰고, 그다음 ㅓ!',
+  'ㅞ': 'ㅜ를 먼저 쓰고, 그다음 ㅔ!',
+  'ㅟ': 'ㅜ를 먼저 쓰고, 그다음 ㅣ!',
+  'ㅢ': 'ㅡ를 먼저 쓰고, 그다음 ㅣ!',
+};
+
+/* ================= building letters ================= */
+function fitAspect(r, maxTall, maxWide) {
+  let [x0, y0, x1, y1] = r; const w = x1 - x0, h = y1 - y0;
+  if (h / w > maxTall) { const nh = w * maxTall, cy = (y0 + y1) / 2; y0 = cy - nh / 2; y1 = cy + nh / 2; }
+  else if (w / h > maxWide) { const nw = h * maxWide, cx = (x0 + x1) / 2; x0 = cx - nw / 2; x1 = cx + nw / 2; }
+  return [x0, y0, x1, y1];
+}
+function placeConsonant(c, r, role) {
+  const parts = PAIRS[c] ? PAIRS[c].split('') : [c];
+  let rects = [r];
+  if (parts.length === 2) {
+    const w = r[2] - r[0], gap = w * 0.08, half = (w - gap) / 2;
+    rects = [[r[0], r[1], r[0] + half, r[3]], [r[2] - half, r[1], r[2], r[3]]];
+  }
+  const out = [];
+  parts.forEach((p, i) => {
+    const rr = (p === 'ㅇ' || p === 'ㅎ') ? fitAspect(rects[i], parts.length === 2 ? 1.5 : 1.12, 1.45) : fitAspect(rects[i], parts.length === 2 ? 2.1 : 1.5, 2.1);
+    JP[p].forEach((pts) => out.push({ pts: mapPts(pts, rr), role, jamo: c }));
+  });
+  return out;
+}
+function placeVowel(v, r, role) { return JP[v].map((pts) => ({ pts: mapPts(pts, r), role, jamo: v })); }
+
+function jamoStrokes(j) {
+  if (isCons(j)) return placeConsonant(j, PAIRS[j] ? [8, 22, 92, 78] : [20, 15, 80, 85], null);
+  const cls = VCLASS[j];
+  if (cls === 'H') return placeVowel(j, H_SOLO[j], null);
+  const b = bbox(JP[j].flat());
+  const sx = cls === 'V' ? 0.62 : 0.82, cx = (b[0] + b[2]) / 2, x0 = 50 - cx * sx;
+  return placeVowel(j, [x0, 8, x0 + 100 * sx, 92], null);
+}
+
+function layout(cho, jung, jong) {
+  const cls = VCLASS[jung], has = !!jong;
+  if (cls === 'V') {
+    const v = has ? [52, 4, 96, 62] : [52, 6, 96, 94];
+    const b = bbox(JP[jung].flat());
+    const vLeft = v[0] + (b[0] / 100) * (v[2] - v[0]);
+    const cR = Math.min(vLeft - 7, 58), cL = Math.max(8, cR - 46);
+    return { c: has ? [cL, 8, cR, 50] : [cL, 20, cR, 80], v, f: has ? [16, 64, 84, 94] : null };
+  }
+  if (cls === 'H') {
+    const s = HSUB[jung];
+    if (!has) {
+      if (s === 'top') return { c: [22, 8, 78, 50], v: [6, 54, 94, 80] };
+      if (s === 'bot') return { c: [22, 6, 78, 44], v: [6, 50, 94, 92] };
+      return { c: [22, 10, 78, 54], v: [6, 61, 94, 73] };
+    }
+    if (s === 'top') return { c: [24, 4, 76, 32], v: [8, 36, 92, 52], f: [18, 58, 82, 94] };
+    if (s === 'bot') return { c: [24, 4, 76, 30], v: [8, 35, 92, 58], f: [18, 63, 82, 96] };
+    return { c: [24, 4, 76, 34], v: [8, 37, 92, 49], f: [18, 54, 82, 92] };
+  }
+  const v = has ? [6, 4, 94, 64] : [6, 6, 94, 94];
+  const def = JP[jung], sp = MSPLIT[jung];
+  const hTop = bbox(def.slice(0, sp).flat())[1], vL = bbox(def.slice(sp).flat())[0];
+  const hTopY = v[1] + (hTop / 100) * (v[3] - v[1]);
+  const vLx = v[0] + (vL / 100) * (v[2] - v[0]);
+  return { c: [12, has ? 5 : 9, Math.min(vLx - 10, 60), hTopY - (has ? 4 : 6)], v, f: has ? [18, 68, 82, 96] : null };
+}
+function decompose(ch) {
+  const code = ch.charCodeAt(0) - 0xAC00;
+  if (code < 0 || code > 11171) return null;
+  return { cho: CHO[Math.floor(code / 588)], jung: JUNG[Math.floor((code % 588) / 28)], jong: JONG[code % 28] };
+}
+function syllableStrokes(ch) {
+  const d = decompose(ch);
+  const L = layout(d.cho, d.jung, d.jong);
+  const strokes = [
+    ...placeConsonant(d.cho, L.c, 'cho'),
+    ...placeVowel(d.jung, L.v, 'jung'),
+    ...(d.jong ? placeConsonant(d.jong, L.f, 'jong') : []),
+  ];
+  const b = bbox(strokes.flatMap((s) => s.pts));
+  const w = b[2] - b[0], h = b[3] - b[1];
+  const k = Math.min(84 / w, 84 / h, 1.12), cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
+  strokes.forEach((s) => (s.pts = s.pts.map(([x, y]) => [50 + (x - cx) * k, 50 + (y - cy) * k])));
+  return strokes;
+}
+
+const SP = 1.5;
+const TOL_J = { tol: 11, startTol: 15, endTol: 15, short: 16, win: 15 };
+const TOL_S = { tol: 8.5, startTol: 11.5, endTol: 11.5, short: 12, win: 12 };
+const unitCache = new Map();
+function makeUnit(label, kind) {
+  const ck = kind + ':' + label;
+  if (unitCache.has(ck)) return unitCache.get(ck);
+  const strokes = kind === 'jamo' ? jamoStrokes(label) : syllableStrokes(label);
+  strokes.forEach((s, i) => {
+    s.i = i;
+    s.len = pathLen(s.pts);
+    s.s = resample(s.pts, SP);
+    s.rs = s.s.slice().reverse();
+    s.d = toD(s.pts);
+    s.loop = dist(s.pts[0], s.pts[s.pts.length - 1]) < 1;
+  });
+  const u = { label, kind, strokes, w: kind === 'jamo' ? 7.5 : 6, tol: kind === 'jamo' ? TOL_J : TOL_S };
+  unitCache.set(ck, u);
+  return u;
+}
+function colorOf(unit, i) {
+  return unit.kind === 'jamo' ? `var(--s${(i % 8) + 1})` : `var(--r-${unit.strokes[i].role})`;
+}
+
+/* ================= content ================= */
+const w = (s) => s.split(' ');
+const c = (s) => s.split('');
+const CHAPTERS = [
+  { id: 'c1', title: '자음', emblem: 'ㄱ', color: 1, stages: [
+    { id: '1-1', name: '꺾어 쓰기', items: c('ㄱㄴㄷ') },
+    { id: '1-2', name: '나눠 쓰기', items: c('ㄹㅁ') },
+    { id: '1-3', name: '세로 먼저', items: c('ㅂㅅㅇ') },
+    { id: '1-4', name: '두 번에 쓰기', items: c('ㅈㅊ') },
+    { id: '1-5', name: '획이 많은 자음', items: c('ㅋㅌㅍㅎ') },
+    { id: '1-6', name: '된소리 자음', items: c('ㄲㄸㅃㅆㅉ') },
+    { id: '1-7', name: '헷갈리는 자음', items: c('ㄹㅁㅂㅈㅌㅍ'), review: true },
+    { id: '1-T', name: '자음 시험', test: true, pick: 8 },
+  ] },
+  { id: 'c2', title: '모음', emblem: 'ㅏ', color: 4, stages: [
+    { id: '2-1', name: '옆으로 긋는 모음', items: c('ㅏㅑㅓㅕ') },
+    { id: '2-2', name: '위아래 모음', items: c('ㅗㅛㅜㅠ') },
+    { id: '2-3', name: '긴 획 모음', items: c('ㅡㅣㅐㅔ') },
+    { id: '2-4', name: '획이 많은 모음', items: c('ㅒㅖㅢ') },
+    { id: '2-5', name: 'ㅗ로 시작해요', items: c('ㅘㅙㅚ') },
+    { id: '2-6', name: 'ㅜ로 시작해요', items: c('ㅝㅞㅟ') },
+    { id: '2-7', name: '헷갈리는 모음', items: c('ㅓㅕㅔㅖㅝ'), review: true },
+    { id: '2-T', name: '모음 시험', test: true, pick: 8 },
+  ] },
+  { id: 'c3', title: '받침 없는 글자', emblem: '가', color: 3, stages: [
+    { id: '3-1', name: 'ㅏ 글자 ①', items: c('가나다라') },
+    { id: '3-2', name: 'ㅏ 글자 ②', items: c('마바사아') },
+    { id: '3-3', name: 'ㅏ 글자 ③', items: c('자차카타') },
+    { id: '3-4', name: 'ㅏ ㅑ ㅓ 글자', items: c('파하야거') },
+    { id: '3-5', name: 'ㅓ 글자', items: c('너더러머') },
+    { id: '3-6', name: 'ㅗ 글자 ①', items: c('고노도로') },
+    { id: '3-7', name: 'ㅗ 글자 ②', items: c('모보소오') },
+    { id: '3-8', name: 'ㅜ 글자', items: c('구누두루') },
+    { id: '3-9', name: 'ㅡ ㅣ 글자', items: c('그드기리') },
+    { id: '3-10', name: 'ㅐ ㅔ 글자', items: c('개내게세') },
+    { id: '3-11', name: '겹모음 글자', items: c('과워쉬의') },
+    { id: '3-T', name: '글자 시험', test: true, pick: 8 },
+  ] },
+  { id: 'c4', title: '받침 있는 글자', emblem: '밥', color: 2, stages: [
+    { id: '4-1', name: 'ㄴ 받침', items: c('산눈손') },
+    { id: '4-2', name: 'ㄹ 받침', items: c('달별물') },
+    { id: '4-3', name: 'ㅁ 받침', items: c('곰밤봄') },
+    { id: '4-4', name: 'ㅇ 받침', items: c('공강콩') },
+    { id: '4-5', name: 'ㄱ 받침', items: c('책국약') },
+    { id: '4-6', name: 'ㅂ 받침', items: c('밥집입') },
+    { id: '4-7', name: 'ㅅ 받침', items: c('옷빗맛') },
+    { id: '4-8', name: 'ㅈ ㅊ 받침', items: c('꽃낮빛') },
+    { id: '4-9', name: 'ㅌ ㅍ 받침', items: c('밭숲잎') },
+    { id: '4-10', name: '쌍받침 · 겹받침', items: c('밖있닭') },
+    { id: '4-T', name: '받침 시험', test: true, pick: 8 },
+  ] },
+  { id: 'c5', title: '낱말', emblem: '말', color: 5, stages: [
+    { id: '5-1', name: '가족 ①', items: w('엄마 아빠 아기') },
+    { id: '5-2', name: '가족 ②', items: w('언니 오빠 동생') },
+    { id: '5-3', name: '가족 ③', items: w('할머니 할아버지 가족') },
+    { id: '5-4', name: '동물 ①', items: w('토끼 사자 여우') },
+    { id: '5-5', name: '동물 ②', items: w('고양이 강아지 거북이') },
+    { id: '5-6', name: '과일', items: w('사과 포도 딸기') },
+    { id: '5-7', name: '먹을 것', items: w('수박 바나나 우유') },
+    { id: '5-8', name: '학교 ①', items: w('학교 친구 연필') },
+    { id: '5-9', name: '학교 ②', items: w('가방 공책 지우개') },
+    { id: '5-10', name: '내 몸', items: w('머리 얼굴 손가락') },
+    { id: '5-11', name: '자연 ①', items: w('하늘 구름 바다') },
+    { id: '5-12', name: '자연 ②', items: w('나무 꽃밭 무지개') },
+    { id: '5-13', name: '탈것', items: w('버스 기차 자전거') },
+    { id: '5-14', name: '색깔', items: w('빨강 노랑 파랑') },
+    { id: '5-T', name: '낱말 시험', test: true, pick: 4 },
+  ] },
+  { id: 'c6', title: '문장', emblem: '문', color: 6, stages: [
+    { id: '6-1', name: '인사하기', items: ['안녕하세요', '고맙습니다'] },
+    { id: '6-2', name: '마음 전하기', items: ['사랑해요', '미안해요'] },
+    { id: '6-3', name: '밥 먹을 때', items: ['잘 먹겠습니다'] },
+    { id: '6-4', name: '학교 가는 길', items: ['나는 학교에 가요'] },
+    { id: '6-5', name: '친구랑', items: ['친구야 같이 놀자'] },
+    { id: '6-6', name: '우리 가족', items: ['엄마 아빠 사랑해요'] },
+    { id: '6-7', name: '봄이 왔어요', items: ['꽃이 활짝 피었어요'] },
+    { id: '6-8', name: '밤하늘', items: ['하늘에 별이 반짝반짝'] },
+  ] },
+];
+const STAGES = [];
+CHAPTERS.forEach((ch, ci) => {
+  const pool = [...new Set(ch.stages.filter((s) => !s.test).flatMap((s) => s.items))];
+  ch.stages.forEach((s) => { s.ch = ch; s.ci = ci; s.gi = STAGES.length; if (s.test) s.pool = pool; STAGES.push(s); });
+});
+
+const CONS19 = c('ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ');
+const VOW21 = c('ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ');
+const TABLE_C = c('ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ');
+const TABLE_V = c('ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ');
+const THEMES = [
+  ['가족', w('엄마 아빠 아기 언니 오빠 누나 형 동생 할머니 할아버지 삼촌 이모 고모 가족 우리')],
+  ['동물', w('개 소 말 곰 닭 양 새 토끼 사자 여우 오리 거북 하마 기린 펭귄 돼지 나비 개미 고양이 강아지 코끼리 원숭이 호랑이 다람쥐 개구리 물고기')],
+  ['먹을 것', w('배 귤 감 떡 빵 밥 국 사과 포도 딸기 수박 참외 복숭아 바나나 우유 김치 국수 김밥 과자 사탕 라면 계란 두부 주스')],
+  ['학교', w('책 학교 교실 친구 연필 공책 가방 의자 책상 칠판 숙제 그림 노래 운동장 선생님 지우개 크레파스 급식')],
+  ['내 몸', w('눈 코 입 귀 손 발 이 팔 머리 다리 얼굴 어깨 무릎 배꼽 발가락 손가락')],
+  ['자연', w('해 달 별 산 강 비 꽃 풀 돌 하늘 구름 바다 바람 나무 무지개 꽃밭 눈사람')],
+  ['탈것 · 물건', w('차 버스 기차 택시 트럭 자전거 비행기 지하철 시계 우산 모자 신발 양말 장갑 안경')],
+  ['색깔 · 숫자', w('빨강 노랑 파랑 초록 보라 분홍 하나 둘 셋 넷 다섯 여섯 일곱 여덟 아홉 열')],
+];
+const SENTENCES = ['안녕하세요', '고맙습니다', '사랑해요', '미안해요', '잘 먹겠습니다', '잘 자요', '다녀오겠습니다', '나는 학교에 가요', '친구야 같이 놀자', '엄마 아빠 사랑해요', '꽃이 활짝 피었어요', '하늘에 별이 반짝반짝', '강아지가 멍멍 짖어요', '오늘은 날씨가 맑아요', '사과는 빨간색이에요', '나는 그림을 그려요', '우리 집에 놀러 와', '물을 많이 마셔요'];
+const WORD_COUNT = new Set(THEMES.flatMap((t) => t[1])).size;
+
+const LEVELS = [[0, '새싹 연필'], [15, '꼬마 연필'], [40, '씩씩한 연필'], [80, '반짝 연필'], [140, '멋쟁이 연필'], [220, '은빛 연필'], [320, '금빛 연필'], [450, '무지개 연필'], [600, '획순 달인'], [800, '획순 박사']];
+const levelOf = (t) => { let i = 0; while (i + 1 < LEVELS.length && t >= LEVELS[i + 1][0]) i++; return i; };
+const STICKERS = ['🐣', '🐰', '🐻', '🦊', '🐼', '🐯', '🐨', '🐸', '🦁', '🐶', '🐱', '🐵', '🦄', '🐳', '🐙', '🦋', '🐞', '🐢', '🦒', '🐘', '🦔', '🐧', '🦉', '🐬', '🌻', '🌷', '🍓', '🍉', '🍒', '🍩', '🍦', '🧁', '🚀', '🚂', '🚲', '🎈', '🌈', '⭐', '🌙', '☀️', '🎨', '🎵', '⚽', '🏆', '👑', '💎', '🦕', '🐲'];
+const STICKER_EVERY = 12;
+
+const isSyl = (ch) => ch >= '가' && ch <= '힣';
+const isJamoChar = (ch) => !!J[ch] || !!PAIRS[ch];
+function itemType(text) {
+  const chars = [...text];
+  if (chars.length === 1) return isJamoChar(text) ? 'jamo' : 'syllable';
+  return text.includes(' ') ? 'sentence' : 'word';
+}
+const keyOf = (text) => (itemType(text) === 'jamo' ? 'j:' : itemType(text) === 'syllable' ? 's:' : 'w:') + text;
+const bestOf = (text) => store.stars[keyOf(text)] || 0;
+const textOfKey = (k) => k.slice(2);
+function defaultReps(type) { return type === 'jamo' || type === 'syllable' ? ['trace', 'faint', 'ghost'] : type === 'word' ? ['trace', 'ghost'] : ['faint']; }
+const REP_LABEL = { trace: '따라 쓰기', faint: '흐린 글씨', ghost: '혼자 쓰기' };
+
+/* ================= sound & voice ================= */
+let actx = null, lastSfx = 0;
+function audio() {
+  if (store.muted) return null;
+  try {
+    if (!actx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; actx = new AC(); }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  } catch (e) { return null; }
+}
+function note(freq, start, dur, type = 'triangle', vol = 0.16) {
+  const a = audio(); if (!a) return;
+  lastSfx = performance.now() + (start + dur) * 1000;
+  try {
+    const o = a.createOscillator(), g = a.createGain(), t = a.currentTime + start;
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + 0.05);
+  } catch (e) {}
+}
+const PENTA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5, 1568, 1760, 2093];
+const sfxGood = (i) => { const k = Math.min(i, PENTA.length - 3); note(PENTA[k], 0, 0.25); note(PENTA[k + 2], 0.07, 0.3, 'sine', 0.09); };
+const sfxBad = () => { note(330, 0, 0.18, 'triangle', 0.09); note(262, 0.13, 0.24, 'triangle', 0.08); };
+const sfxRound = () => { [0, 2, 4].forEach((k, j) => note(PENTA[k + 3], j * 0.09, 0.26)); };
+const sfxWin = () => { [0, 2, 4, 5, 7].forEach((k, j) => note(PENTA[k], j * 0.11, 0.32)); note(PENTA[9], 0.6, 0.7, 'sine', 0.12); };
+/* Speech only right after a tap, never while sound effects play: speech on top of Web Audio closed the app on a tablet. */
+function say(text) {
+  if (store.muted || !('speechSynthesis' in window) || performance.now() < lastSfx + 150) return;
+  try {
+    const ss = window.speechSynthesis;
+    if (ss.speaking || ss.pending) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR'; u.rate = 0.9;
+    ss.speak(u);
+  } catch (e) {}
+}
+function hush() { try { const ss = window.speechSynthesis; if (ss && (ss.speaking || ss.pending)) ss.cancel(); } catch (e) {} }
+
+/* ================= session state ================= */
+const st = {
+  sess: null, itemIdx: 0, repIdx: 0, units: [], display: [], unitIdx: 0,
+  mode: 'trace', strokeIdx: 0, hint: false, missStreak: 0, itemMistakes: 0,
+  animating: false, busy: false, returnTo: 'home',
+};
+let animToken = 0;
+let layers = null;
+const board = $('#board');
+const unit = () => st.units[st.unitIdx];
+const curItem = () => st.sess.items[st.itemIdx];
+const repsOf = (item) => st.sess.reps || defaultReps(item.type);
+const curReps = () => repsOf(curItem());
+
+/* ================= screens ================= */
+function show(id) {
+  ['home', 'free', 'practice'].forEach((s) => ($('#' + s).hidden = s !== id));
+  window.scrollTo(0, 0);
+}
+function syncStars() { ['homeStars', 'freeStars', 'barStars'].forEach((id) => ($('#' + id).textContent = store.total)); }
+
+/* ================= home ================= */
+const stageDone = (s) => (store.stages[s.id] || 0) > 0;
+const stageOpen = (s) => store.unlockAll || s.gi === 0 || stageDone(STAGES[s.gi - 1]);
+function nextStage() { return STAGES.find((s) => !stageDone(s) && stageOpen(s)) || STAGES.find((s) => !stageDone(s)) || STAGES[STAGES.length - 1]; }
+const weakList = () => Object.entries(store.weak).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).map(([k]) => textOfKey(k));
+let openChapter = null;
+
+function miniGlyph(label, kind, withBadges = true) {
+  const u = makeUnit(label, kind);
+  const svg = S('svg', { viewBox: '0 0 100 100', class: 'glyph', 'aria-hidden': 'true' });
+  S('rect', { x: 1.5, y: 1.5, width: 97, height: 97, rx: 8, fill: 'var(--paper)', stroke: 'var(--frame)', 'stroke-width': 1.5 }, svg);
+  S('path', { d: 'M50 3 V97 M3 50 H97', stroke: 'var(--line)', 'stroke-width': 1, 'stroke-dasharray': '3 3', fill: 'none' }, svg);
+  const g = S('g', { class: 'done' }, svg);
+  u.strokes.forEach((s, i) => S('path', { d: s.d, 'stroke-width': u.w, style: `stroke:${colorOf(u, i)}` }, g));
+  if (withBadges) { const bg = S('g', null, svg); u.strokes.forEach((s, i) => drawBadge(bg, s, i, colorOf(u, i), kind === 'jamo' ? 6.2 : 5.2, true)); }
+  return svg;
+}
+function renderHome() {
+  syncStars();
+  const lv = levelOf(store.total), nextLv = LEVELS[lv + 1];
+  $('#lvNum').textContent = lv + 1;
+  $('#lvName').textContent = LEVELS[lv][1];
+  $('#lvBar').style.width = nextLv ? `${((store.total - LEVELS[lv][0]) / (nextLv[0] - LEVELS[lv][0])) * 100}%` : '100%';
+  $('#lvNext').textContent = nextLv ? `다음 레벨 ‘${nextLv[1]}’까지 별 ${nextLv[0] - store.total}개` : '최고 레벨이에요!';
+  const n = todayCount();
+  $('#todayN').textContent = n; $('#todayGoal').textContent = store.goal;
+  $('#todayBar').style.width = `${Math.min(100, (n / store.goal) * 100)}%`;
+  renderWeek();
+  const ns = nextStage();
+  const cb = $('#continueBtn'); cb.innerHTML = '';
+  cb.append(H('div', null, stageDone(ns) ? '다시 하기' : '이어서 하기', H('span', { text: `${ns.id} ${ns.name}` })));
+  cb.onclick = () => openSheet(ns);
+  const weak = weakList();
+  const rb = $('#reviewBtn'); rb.innerHTML = '';
+  rb.append(H('div', null, '복습', H('span', { text: weak.length ? `틀린 글자 ${weak.length}개` : '틀린 글자 없음' })));
+  rb.onclick = () => { if (weak.length) startSession(reviewSession(), 'home'); else toast('틀린 글자가 없어요. 아주 잘하고 있어요!'); };
+  renderChapters(); renderShelf();
+}
+function renderWeek() {
+  const wk = $('#week'); wk.innerHTML = '';
+  const names = ['일', '월', '화', '수', '목', '금', '토'];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const n = store.days[dayKey(d)] || 0;
+    wk.append(H('div', { class: 'day' + (n >= store.goal ? ' goal' : n > 0 ? ' some' : '') + (i === 0 ? ' today-d' : ''), title: `${n}글자` },
+      H('i', { text: n >= store.goal ? '★' : '' }), names[d.getDay()]));
+  }
+  let streak = 0;
+  for (let i = todayCount() > 0 ? 0 : 1; ; i++) { const d = new Date(); d.setDate(d.getDate() - i); if ((store.days[dayKey(d)] || 0) > 0) streak++; else break; }
+  if (streak >= 2) wk.append(H('span', { class: 'streak', text: `${streak}일 연속 연습!` }));
+}
+function renderChapters() {
+  const box = $('#chapters'); box.innerHTML = '';
+  const ns = nextStage();
+  if (openChapter === null) openChapter = ns.ci;
+  CHAPTERS.forEach((ch, ci) => {
+    const done = ch.stages.filter(stageDone).length;
+    const locked = !stageOpen(ch.stages[0]);
+    const isOpen = openChapter === ci;
+    const sec = H('section', { class: 'chapter' + (isOpen ? ' open' : '') + (locked ? ' locked' : ''), style: `--c: var(--s${ch.color})` });
+    const head = H('button', { class: 'ch-head', type: 'button', 'aria-expanded': String(isOpen), onclick: () => { openChapter = isOpen ? -1 : ci; renderChapters(); } },
+      H('span', { class: 'emblem', text: ch.emblem }),
+      H('span', { class: 'ch-text' },
+        H('h3', { text: `${ci + 1}장 · ${ch.title}` }),
+        H('p', { text: locked ? '앞 장을 끝내면 열려요' : `${ch.stages.length}단계 중 ${done}단계 통과${store.medals.includes(ch.id) ? ' · 메달 받음' : ''}` }),
+        H('div', { class: 'meter' }, H('i', { style: `width:${(done / ch.stages.length) * 100}%` }))),
+      useIcon('i-chev'));
+    head.lastChild.setAttribute('class', 'chev');
+    sec.append(head);
+    if (isOpen) { const road = H('div', { class: 'road' }); renderRoad(ch, road, ns); sec.append(road); }
+    box.append(sec);
+  });
+}
+function renderRoad(ch, road, ns) {
+  const n = ch.stages.length, ROW = 122, TOP = 66, X = [50, 74, 50, 26];
+  const Ht = TOP + (n - 1) * ROW + 86;
+  road.style.height = Ht + 'px';
+  const svg = S('svg', { class: 'trail', viewBox: `0 0 100 ${Ht}`, preserveAspectRatio: 'none', 'aria-hidden': 'true' }, road);
+  let d = '';
+  ch.stages.forEach((s, i) => {
+    const x = X[i % 4], y = TOP + i * ROW;
+    if (!i) d = `M${x} ${y}`;
+    else { const px = X[(i - 1) % 4], py = y - ROW; d += ` C${px} ${py + ROW * 0.55} ${x} ${y - ROW * 0.55} ${x} ${y}`; }
+  });
+  S('path', { d }, svg);
+  ch.stages.forEach((s, i) => {
+    const x = X[i % 4], y = TOP + i * ROW, open = stageOpen(s), done = stageDone(s), cur = s === ns && open;
+    const disc = H('span', { class: 'disc' });
+    if (!open) disc.append(useIcon('i-lock'));
+    else if (s.test) disc.append(useIcon('i-trophy'));
+    else disc.append(s.id);
+    if (cur) disc.append(H('span', { class: 'flag', text: '여기부터!' }));
+    const sub = s.test ? `${s.pick}개 섞어서` : s.items.join(itemType(s.items[0]) === 'jamo' || itemType(s.items[0]) === 'syllable' ? ' ' : ', ');
+    road.append(H('button', {
+      class: 'node' + (done ? ' done' : '') + (!open ? ' locked' : '') + (cur ? ' cur' : '') + (s.test ? ' test' : ''),
+      type: 'button', style: `left:${x}%;top:${y}px`,
+      'aria-label': `${s.id} ${s.name}${!open ? ' (잠김)' : done ? ` (별 ${store.stages[s.id]}개)` : ''}`,
+      onclick: () => (open ? openSheet(s) : toast('앞 단계를 먼저 끝내면 열려요!')),
+    }, disc, H('span', { class: 'lab', text: s.name }), done ? miniStars(store.stages[s.id]) : H('span', { class: 'sub', text: sub })));
+  });
+}
+function renderShelf() {
+  const md = $('#medals'); md.innerHTML = '';
+  CHAPTERS.forEach((ch) => md.append(H('div', { class: 'medal' + (store.medals.includes(ch.id) ? ' got' : ''), style: `--c: var(--s${ch.color})` }, H('i', { text: ch.emblem }), `${ch.title} 메달`)));
+  const sk = $('#stickers'); sk.innerHTML = '';
+  const got = Math.min(STICKERS.length, Math.floor(store.total / STICKER_EVERY));
+  for (let i = 0; i < got; i++) sk.append(H('span', { class: 'sticker', text: STICKERS[i] }));
+  for (let i = got; i < Math.min(STICKERS.length, got + 3); i++) sk.append(H('span', { class: 'sticker locked', text: '?' }));
+  $('#stickerNext').textContent = got >= STICKERS.length ? '스티커를 모두 모았어요!' : `별을 ${STICKER_EVERY - (store.total % STICKER_EVERY)}개 더 모으면 새 스티커! (별 ${STICKER_EVERY}개 = 스티커 1장)`;
+}
+
+/* ---------- stage sheet ---------- */
+function openSheet(s) {
+  const sh = $('#sheet'); sh.innerHTML = '';
+  const best = store.stages[s.id] || 0;
+  const prev = H('div', { class: 'preview' });
+  const list = s.test ? [] : s.items;
+  list.forEach((t) => {
+    const ty = itemType(t);
+    if (ty === 'jamo' || ty === 'syllable') prev.append(miniGlyph(t, ty, false));
+    else prev.append(H('span', { class: 'wchip', text: t }));
+  });
+  let desc;
+  if (s.test) desc = `지금까지 배운 글자 중 ${s.pick}개가 섞여 나와요. 아주 흐린 글씨 위에 순서를 기억해서 한 번씩 써요.`;
+  else if (s.review) desc = '헷갈리기 쉬운 글자를 흐린 글씨와 혼자 쓰기로 두 번씩 다시 써요.';
+  else { const reps = defaultReps(itemType(s.items[0])); desc = `글자마다 ${reps.map((r) => REP_LABEL[r]).join(' → ')}로 ${reps.length}번 써요.`; }
+  sh.append(
+    H('div', { class: 'kicker', text: `${s.ci + 1}장 ${s.ch.title} · ${s.id}` }),
+    H('h2', { text: s.name }),
+    prev.childNodes.length ? prev : null,
+    H('p', { text: desc }),
+    best ? H('div', null, H('span', { text: '최고 기록 ' }), miniStars(best)) : null,
+    H('div', { class: 'sheet-actions' },
+      H('button', { class: 'btn', type: 'button', text: '닫기', onclick: closeSheet }),
+      H('button', { class: 'btn primary', type: 'button', text: best ? '다시 하기' : '시작하기', onclick: () => { closeSheet(); startSession(stageSession(s), 'home'); } })));
+  $('#sheetLayer').hidden = false;
+  setTimeout(() => sh.querySelector('.btn.primary').focus({ preventScroll: true }), 30);
+}
+function closeSheet() { $('#sheetLayer').hidden = true; }
+$('#sheetLayer').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeSheet(); });
+
+/* ---------- sessions ---------- */
+function stageSession(s) {
+  if (s.test) return { title: `${s.id} ${s.name}`, kind: 'test', stage: s, texts: shuffle(s.pool).slice(0, s.pick), reps: ['ghost'], watch: false };
+  if (s.review) return { title: `${s.id} ${s.name}`, kind: 'stage', stage: s, texts: s.items, reps: ['faint', 'ghost'], watch: false };
+  return { title: `${s.id} ${s.name}`, kind: 'stage', stage: s, texts: s.items };
+}
+function reviewSession() { return { title: '틀린 글자 복습', kind: 'review', texts: weakList().slice(0, 6), reps: ['faint', 'ghost'], watch: false }; }
+function freeSession(texts, title) { return { title, kind: 'free', texts }; }
+
+function startSession(def, returnTo) {
+  audio();
+  st.sess = Object.assign({}, def, { items: def.texts.map((t) => ({ text: t, type: itemType(t) })) });
+  st.sess.results = [];
+  st.sess.before = { total: store.total, day: todayCount(), medals: store.medals.length };
+  st.returnTo = returnTo || 'home';
+  st.itemIdx = 0;
+  $('#sessTitle').textContent = def.title;
+  $('#winLayer').hidden = true;
+  show('practice');
+  beginItem();
+}
+function beginItem() {
+  const item = curItem();
+  st.units = []; st.display = [];
+  if (item.type === 'jamo') st.units = [makeUnit(item.text, 'jamo')];
+  else for (const ch of item.text) {
+    if (isSyl(ch)) { st.display.push({ ch, u: st.units.length }); st.units.push(makeUnit(ch, 'syllable')); }
+    else st.display.push({ ch, u: null });
+  }
+  st.repIdx = 0; st.itemMistakes = 0; st.unitIdx = 0;
+  renderItems();
+  const watch = st.sess.watch !== undefined ? st.sess.watch : (item.type === 'jamo' || item.type === 'syllable');
+  if (watch) startWatch(() => startRound()); else startRound();
+}
+function startRound() {
+  animToken++; st.animating = false; st.busy = false;
+  st.mode = curReps()[st.repIdx]; st.unitIdx = 0; st.strokeIdx = 0; st.hint = false; st.missStreak = 0;
+  renderUnit(); renderPips();
+  setMsg(roundMsg());
+}
+function roundMsg() {
+  if (st.mode === 'trace') return '반짝이는 1번 점에서 시작해서 화살표 쪽으로 그어요.';
+  if (st.mode === 'faint') return '이번엔 번호가 없어요. 흐린 글씨 위에 순서대로 써요.';
+  return '아주 흐린 글씨예요. 순서를 기억해서 혼자 써 봐요!';
+}
+function startWatch(then) {
+  st.mode = 'watch'; st.strokeIdx = 0; st.hint = false; st.watchThen = then;
+  renderUnit(); renderPips();
+  playWatch(then);
+}
+
+/* ---------- practice rendering ---------- */
+function renderItems() {
+  const box = $('#items'); box.innerHTML = '';
+  st.sess.items.forEach((it, i) => {
+    const r = st.sess.results[i];
+    box.append(H('div', { class: 'ichip' + ([...it.text].length > 2 ? ' long' : '') + (i === st.itemIdx ? ' on' : '') + (r ? ' done' : '') },
+      H('span', { text: it.text }), r ? miniStars(r) : null));
+  });
+  const on = box.children[st.itemIdx];
+  if (on) on.scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
+  syncStars();
+}
+function renderPips() {
+  const box = $('#pips'); box.innerHTML = '';
+  curReps().forEach((r, i) => {
+    const done = i < st.repIdx, on = i === st.repIdx && st.mode !== 'watch';
+    box.append(H('div', { class: 'pip' + (done ? ' done' : '') + (on ? ' on' : '') }, H('b', { text: done ? '✓' : String(i + 1) }), REP_LABEL[r]));
+  });
+}
+function renderInfo() {
+  const item = curItem(), u = unit();
+  $('#itemName').textContent = item.type === 'jamo' ? `${u.label}  ${jamoName(u.label)}` : item.text;
+  $('#strokeCount').textContent = st.units.length > 1 ? `${u.label} · ${u.strokes.length}획` : `${u.strokes.length}획`;
+  const tip = $('#tipBox'); tip.innerHTML = '';
+  if (u.kind === 'jamo') tip.append(H('p', { class: 'tip', text: TIPS[u.label] || '' }));
+  else {
+    const d = decompose(u.label);
+    const line = H('div', { class: 'order-line' });
+    const parts = [['cho', d.cho, '첫소리'], ['jung', d.jung, '가운데소리']];
+    if (d.jong) parts.push(['jong', d.jong, '받침']);
+    parts.forEach(([role, j, lab], i) => {
+      if (i) line.append(H('span', { text: '→' }));
+      line.append(H('span', { class: 'j', style: `color:var(--r-${role})`, text: j }), H('span', { text: lab }));
+    });
+    tip.append(line);
+  }
+  const wl = $('#wordLine');
+  if (st.units.length > 1) {
+    wl.hidden = false; wl.innerHTML = '';
+    wl.classList.toggle('compact', st.display.length > 6);
+    let grp = H('span', { class: 'wgroup' }); wl.append(grp);
+    st.display.forEach((x) => {
+      if (x.u === null) { grp = H('span', { class: 'wgroup' }); wl.append(grp); return; }
+      grp.append(H('span', { class: 'syl' + (x.u < st.unitIdx ? ' done' : '') + (x.u === st.unitIdx ? ' on' : ''), text: x.ch }));
+    });
+  } else wl.hidden = true;
+}
+
+/* ---------- board drawing ---------- */
+function setupBoard() {
+  board.innerHTML = '';
+  board.classList.toggle('ghost', st.mode === 'ghost');
+  S('rect', { x: 1, y: 1, width: 98, height: 98, rx: 3, fill: 'var(--paper)', stroke: 'var(--frame)', 'stroke-width': 0.9 }, board);
+  S('path', { d: 'M50 1.5 V98.5 M1.5 50 H98.5', stroke: 'var(--line)', 'stroke-width': 0.6, 'stroke-dasharray': '2 2', fill: 'none' }, board);
+  layers = {};
+  ['gl', 'done', 'hint', 'anim', 'badges', 'ink'].forEach((k) => (layers[k] = S('g', { class: k }, board)));
+}
+function drawGuide() { const u = unit(); u.strokes.forEach((s) => S('path', { d: s.d, 'stroke-width': u.w }, layers.gl)); }
+function drawDone(i, pop) { const u = unit(), s = u.strokes[i]; S('path', { d: s.d, 'stroke-width': u.w, style: `stroke:${colorOf(u, i)}`, class: pop ? 'pop' : '' }, layers.done); }
+function badgePos(s, r) {
+  const a = s.pts[0];
+  const b = s.pts.find((p) => dist(p, a) >= 3) || s.pts[s.pts.length - 1];
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, off = r + 3.4;
+  let x = a[0] - (dx / L) * off, y = a[1] - (dy / L) * off;
+  x = Math.min(98 - r, Math.max(2 + r, x)); y = Math.min(98 - r, Math.max(2 + r, y));
+  return [x, y];
+}
+function drawBadge(layer, s, i, color, r, offset) {
+  const [x, y] = offset ? badgePos(s, r) : s.pts[0];
+  const g = S('g', null, layer);
+  S('circle', { cx: x, cy: y, r, style: `fill:${color}` }, g);
+  const t = S('text', { x, y, 'font-size': r * 1.3, class: 'badge-num' }, g);
+  t.textContent = i + 1;
+  return g;
+}
+function arrowHead(layer, s, color, w) {
+  let at, b;
+  if (s.loop) { const L = s.len * 0.3; at = pointAt(s.pts, L); b = pointAt(s.pts, L - 3); }
+  else {
+    at = s.pts[s.pts.length - 1];
+    for (let i = s.pts.length - 2; i >= 0; i--) if (dist(s.pts[i], at) >= 2.5) { b = s.pts[i]; break; }
+    b = b || s.pts[0];
+  }
+  const dx = at[0] - b[0], dy = at[1] - b[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+  const z = w * 0.85, push = s.loop ? 0 : w * 0.55;
+  const tip = [at[0] + ux * (z + push), at[1] + uy * (z + push)];
+  const base = [at[0] + ux * push - ux * z * 0.25, at[1] + uy * push - uy * z * 0.25];
+  const l = [base[0] - uy * z * 0.8, base[1] + ux * z * 0.8], r = [base[0] + uy * z * 0.8, base[1] - ux * z * 0.8];
+  S('path', { d: `M${tip[0]} ${tip[1]} L${l[0]} ${l[1]} L${r[0]} ${r[1]} Z`, style: `fill:${color};stroke:${color}`, 'stroke-width': 0.8, 'stroke-linejoin': 'round' }, layer);
+}
+function showHint() {
+  layers.hint.innerHTML = '';
+  const u = unit();
+  const visible = st.mode === 'trace' || ((st.mode === 'faint' || st.mode === 'ghost') && st.hint);
+  if (!visible || st.strokeIdx >= u.strokes.length) return;
+  const i = st.strokeIdx, s = u.strokes[i], c = colorOf(u, i);
+  S('path', { d: s.d, 'stroke-width': u.w, class: 'hint-glow', style: `stroke:${c}` }, layers.hint);
+  S('path', { d: s.d, 'stroke-width': u.w * 0.4, class: 'hint-march', style: `stroke:${c}` }, layers.hint);
+  arrowHead(layers.hint, s, c, u.w);
+  const r = u.kind === 'jamo' ? 5.2 : 4.3;
+  if (!reduceMotion()) S('circle', { cx: s.pts[0][0], cy: s.pts[0][1], r, class: 'pulse', style: `stroke:${c}` }, layers.hint);
+  drawBadge(layers.hint, s, i, c, r, false);
+}
+function renderSteps() {
+  const box = $('#stepsBox'), steps = $('#steps');
+  if (st.mode !== 'watch') { box.hidden = true; return; }
+  box.hidden = false; steps.innerHTML = '';
+  const u = unit();
+  u.strokes.forEach((s, k) => {
+    const svg = S('svg', { viewBox: '0 0 100 100', class: 'step', role: 'img', 'aria-label': `${k + 1}번째 획` });
+    S('rect', { x: 2, y: 2, width: 96, height: 96, rx: 8, fill: 'var(--paper)', stroke: 'var(--chip-line)', 'stroke-width': 2.5 }, svg);
+    const g = S('g', { class: 'done' }, svg);
+    for (let j = 0; j < k; j++) S('path', { d: u.strokes[j].d, 'stroke-width': u.w, style: 'stroke:var(--step-done)' }, g);
+    const c = colorOf(u, k);
+    S('path', { d: s.d, 'stroke-width': u.w, style: `stroke:${c}` }, g);
+    arrowHead(svg, s, c, u.w);
+    drawBadge(svg, s, k, c, u.kind === 'jamo' ? 7 : 6, true);
+    steps.append(svg);
+  });
+}
+function renderUnit() {
+  setupBoard(); drawGuide();
+  for (let i = 0; i < st.strokeIdx; i++) drawDone(i, false);
+  renderInfo(); renderSteps(); showHint();
+}
+
+/* ---------- messages ---------- */
+function setMsg(text, tone) {
+  const m = $('#msg');
+  m.textContent = text;
+  m.className = 'bubble' + (tone ? ' ' + tone : '');
+  const b = $('#buddy');
+  b.classList.remove('hop', 'sad'); void b.getBoundingClientRect();
+  if (tone === 'good') b.classList.add('hop'); else if (tone === 'bad') b.classList.add('sad');
+}
+
+/* ---------- watching ---------- */
+async function playWatch(then) {
+  const my = ++animToken;
+  st.animating = true;
+  const u = unit();
+  setMsg('잘 보세요! 숫자 순서대로 써 볼게요.');
+  await wait(600);
+  for (let i = 0; i < u.strokes.length; i++) {
+    if (my !== animToken) return;
+    const s = u.strokes[i], c = colorOf(u, i);
+    drawBadge(layers.badges, s, i, c, u.kind === 'jamo' ? 5 : 4.2, true);
+    await animateStroke(s, c, u.w, layers.anim, my);
+    await wait(260);
+  }
+  if (my !== animToken) return;
+  st.animating = false;
+  setMsg('이제 써 볼까요?', 'good');
+  await wait(900);
+  if (my !== animToken) return;
+  then();
+}
+function animateStroke(s, color, w, layer, token) {
+  return new Promise((res) => {
+    const path = S('path', { d: '', 'stroke-width': w, style: `stroke:${color}` }, layer);
+    const tip = S('circle', { r: w * 0.62, style: `fill:${color}`, opacity: 0.55 }, layer);
+    const dur = 450 + s.len * 11, t0 = performance.now();
+    const step = (now) => {
+      if (token !== animToken) return res();
+      const t = Math.min(1, (now - t0) / dur);
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      const part = partial(s.pts, s.len * e);
+      path.setAttribute('d', toD(part));
+      const q = part[part.length - 1];
+      tip.setAttribute('cx', q[0]); tip.setAttribute('cy', q[1]);
+      if (t < 1) requestAnimationFrame(step); else { tip.remove(); res(); }
+    };
+    requestAnimationFrame(step);
+  });
+}
+function replayWatch() {
+  if (!st.sess || st.busy) return;
+  const mode = st.mode === 'watch' ? curReps()[st.repIdx] : st.mode;
+  const item = curItem();
+  say(item.type === 'jamo' ? jamoName(item.text) : unit().label);
+  startWatch(() => { st.mode = mode; st.strokeIdx = 0; st.hint = false; st.busy = false; renderUnit(); renderPips(); setMsg(roundMsg()); });
+}
+
+/* ---------- judging a drawn stroke ---------- */
+function meanDist(u, t) {
+  let sum = 0;
+  for (const p of u) { let best = Infinity; for (const q of t) { const d = (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2; if (d < best) best = d; } sum += Math.sqrt(best); }
+  return sum / u.length;
+}
+/* walk along the target in drawing order; progress can only move forward */
+function follow(u, t, o) {
+  const n = t.length;
+  if (dist(u[0], t[0]) > o.startTol) return { startOk: false, rem: Infinity, endOk: false, off: 1 };
+  const W = Math.ceil(o.win / SP), B = 3;
+  let idx = 0, off = 0;
+  for (const p of u) {
+    let best = Infinity, bj = idx;
+    for (let j = Math.max(0, idx - B); j <= Math.min(n - 1, idx + W); j++) { const d = dist(p, t[j]); if (d < best) { best = d; bj = j; } }
+    if (best <= o.tol) { if (bj > idx) idx = bj; } else off++;
+  }
+  return { startOk: true, rem: (n - 1 - idx) * SP, endOk: dist(u[u.length - 1], t[n - 1]) <= o.endTol, off: off / u.length };
+}
+const covered = (f, s) => f.startOk && f.rem <= Math.max(0.18 * s.len, 6);
+function matchStroke(u, uLen, s, o, reversed) {
+  const t = reversed ? s.rs : s.s;
+  const ds = dist(u[0], t[0]), de = dist(u[u.length - 1], t[t.length - 1]);
+  const md = meanDist(u, t);
+  const cost = md + 0.5 * (ds + de);
+  if (s.len < o.short) {
+    const tiny = s.len < 7;
+    const dirOk = tiny || (de < dist(u[u.length - 1], t[0]) && ds < dist(u[0], t[t.length - 1]));
+    const ok = ds <= o.startTol && de <= o.endTol && md <= o.tol && dirOk &&
+      uLen <= s.len * 2.6 + 12 && uLen >= Math.min(s.len * 0.35, 1.2);
+    return { ok, cost };
+  }
+  const f = follow(u, t, o);
+  return { ok: covered(f, s) && f.endOk && f.off <= 0.3, cost };
+}
+function judge(raw) {
+  const uLen = pathLen(raw);
+  if (uLen < (unit().strokes[st.strokeIdx].len < 7 ? 1.2 : 2.5)) return { type: 'tap' };
+  const u = resample(raw, SP), U = unit(), o = U.tol, idx = st.strokeIdx, strokes = U.strokes;
+  let best = null;
+  for (let k = idx; k < strokes.length; k++) {
+    const r = matchStroke(u, uLen, strokes[k], o, false);
+    if (r.ok) { const c = r.cost * (k === idx ? 0.7 : 1); if (!best || c < best.c) best = { k, c }; }
+  }
+  if (best) return best.k === idx ? { type: 'ok' } : { type: 'order', k: best.k };
+  for (let k = idx; k < strokes.length; k++) {
+    if (matchStroke(u, uLen, strokes[k], o, true).ok) return k === idx ? { type: 'reverse' } : { type: 'order', k };
+  }
+  for (let k = 0; k < idx; k++) if (matchStroke(u, uLen, strokes[k], o, false).ok) return { type: 'again' };
+  const s = strokes[idx], f = follow(u, s.s, o);
+  if (!f.startOk) return { type: 'start' };
+  if (covered(f, s) && !f.endOk && uLen > s.len * 1.25) return { type: 'toolong' };
+  if (!covered(f, s) && uLen < s.len * 0.85) return { type: 'short' };
+  return { type: 'miss' };
+}
+
+/* ---------- pointer input ---------- */
+let drawing = null;
+function toLocal(e) {
+  const r = board.getBoundingClientRect();
+  return [((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100];
+}
+board.addEventListener('pointerdown', (e) => {
+  if (drawing || !layers || !st.sess) return;
+  audio();
+  if (st.mode === 'watch') { animToken++; st.animating = false; st.busy = false; (st.watchThen || startRound)(); }
+  if (st.busy || !$('#winLayer').hidden) return;
+  e.preventDefault();
+  try { board.setPointerCapture(e.pointerId); } catch (err) {}
+  const p = toLocal(e);
+  drawing = { id: e.pointerId, pts: [p], el: S('path', { class: 'ink', d: toD([p]), 'stroke-width': unit().w * 0.78 }, layers.ink) };
+});
+board.addEventListener('pointermove', (e) => {
+  if (!drawing || e.pointerId !== drawing.id) return;
+  e.preventDefault();
+  const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+  for (const ev of (evs.length ? evs : [e])) {
+    const p = toLocal(ev);
+    if (dist(p, drawing.pts[drawing.pts.length - 1]) > 0.35) drawing.pts.push(p);
+  }
+  drawing.el.setAttribute('d', toD(drawing.pts));
+});
+function endDraw(e) {
+  if (!drawing || e.pointerId !== drawing.id) return;
+  const d = drawing; drawing = null;
+  try { handleStroke(d); } catch (err) { d.el.remove(); st.busy = false; setMsg('선을 따라 천천히 다시 그어 볼까요?'); }
+}
+board.addEventListener('pointerup', endDraw);
+board.addEventListener('pointercancel', endDraw);
+
+const GOOD = ['좋아요!', '잘했어요!', '맞아요!', '멋져요!', '바로 그거예요!'];
+function handleStroke(d) {
+  const res = judge(d.pts), U = unit(), idx = st.strokeIdx;
+  if (res.type === 'tap') { d.el.remove(); return; }
+  if (res.type === 'ok') {
+    d.el.remove();
+    drawDone(idx, true);
+    sfxGood(idx);
+    st.strokeIdx++; st.missStreak = 0; st.hint = false;
+    if (st.strokeIdx >= U.strokes.length) { layers.hint.innerHTML = ''; unitDone(); return; }
+    showHint();
+    if (st.mode === 'trace') setMsg(`${pick(GOOD)} 이제 ${st.strokeIdx + 1}번 획이에요.`, 'good');
+    else setMsg(`${pick(GOOD)} 다음 획은 어디일까요?`, 'good');
+    return;
+  }
+  d.el.classList.add('bad');
+  setTimeout(() => d.el.remove(), 1000);
+  sfxBad();
+  st.missStreak++;
+  const reps = curReps();
+  if (st.mode !== 'trace' || reps.every((r) => r === 'trace')) st.itemMistakes++;
+  const n = idx + 1, s = U.strokes[idx];
+  let text;
+  switch (res.type) {
+    case 'order': text = `순서가 달라요! ${n}번 획을 먼저 써요.`; break;
+    case 'reverse': text = s.loop ? '반대로 돌았어요. 위에서 시작해서 왼쪽으로 돌려요!' : '방향이 반대예요. 화살표 쪽으로 그어요!'; break;
+    case 'toolong': text = '끝에서 멈추고 손을 떼요. 한 번에 이어 쓰지 않아요!'; break;
+    case 'short': text = '중간에 떼지 말고 끝까지 쭉 이어서 그어요.'; break;
+    case 'start': text = `${n}번 점에서 시작해요.`; break;
+    case 'again': text = '그 획은 벌써 썼어요! 다음 획을 찾아봐요.'; break;
+    default: text = '선을 따라 천천히 다시 그어 볼까요?';
+  }
+  setMsg(text, 'bad');
+  if (st.mode !== 'trace' && !st.hint) { st.hint = true; showHint(); }
+  if ((st.mode === 'trace' && st.missStreak >= 2) || st.missStreak >= 3) demoCurrent();
+}
+async function demoCurrent() {
+  const U = unit(), i = st.strokeIdx, s = U.strokes[i];
+  st.busy = true; st.missStreak = 0;
+  const my = ++animToken;
+  await wait(700);
+  if (my !== animToken) return;
+  layers.hint.innerHTML = '';
+  setMsg('같이 볼까요? 이렇게 그어요.');
+  await animateStroke(s, colorOf(U, i), U.w, layers.anim, my);
+  if (my !== animToken) return;
+  await wait(450);
+  if (my !== animToken) return;
+  layers.anim.innerHTML = '';
+  st.busy = false; st.hint = true;
+  showHint();
+  setMsg(`이제 해 봐요! ${i + 1}번 점에서 시작해요.`);
+}
+
+/* ---------- progress through a session ---------- */
+async function unitDone() {
+  store.days[dayKey()] = todayCount() + 1; save();
+  const my = animToken;
+  if (st.unitIdx < st.units.length - 1) {
+    st.busy = true;
+    const next = st.units[st.unitIdx + 1].label;
+    setMsg(`${pick(GOOD)} 다음 글자는 ‘${next}’!`, 'good');
+    await wait(800);
+    if (my !== animToken) return;
+    st.unitIdx++; st.strokeIdx = 0; st.hint = false; st.busy = false;
+    renderUnit();
+    setMsg(st.mode === 'trace' ? '반짝이는 1번 점에서 시작해요.' : '어느 획부터 쓸까요?');
+    return;
+  }
+  roundDone();
+}
+async function roundDone() {
+  const reps = curReps(), my = animToken;
+  st.busy = true;
+  st.repIdx++;
+  renderPips();
+  if (st.repIdx < reps.length) {
+    sfxRound();
+    setMsg(`${st.repIdx}번째 완성! 다음은 ‘${REP_LABEL[reps[st.repIdx]]}’예요.`, 'good');
+    await wait(1100);
+    if (my !== animToken) return;
+    startRound();
+    return;
+  }
+  itemDone();
+}
+async function itemDone() {
+  const item = curItem(), key = keyOf(item.text), my = animToken;
+  const m = st.itemMistakes, stars = m === 0 ? 3 : m <= 2 ? 2 : 1;
+  store.stars[key] = Math.max(store.stars[key] || 0, stars);
+  store.total += stars;
+  if (m > 0) store.weak[key] = Math.min(6, (store.weak[key] || 0) + m);
+  else if (store.weak[key]) { store.weak[key] -= 2; if (store.weak[key] <= 0) delete store.weak[key]; }
+  save();
+  st.sess.results[st.itemIdx] = stars;
+  sfxRound();
+  showStarToast(stars, m);
+  renderItems();
+  await wait(1500);
+  if (my !== animToken) return;
+  $('#starToast').hidden = true;
+  if (st.itemIdx < st.sess.items.length - 1) { st.itemIdx++; beginItem(); }
+  else sessionDone();
+}
+function showStarToast(n, m) {
+  const t = $('#starToast'); t.innerHTML = '';
+  const row = H('div', { class: 'row' });
+  for (let i = 0; i < 3; i++) { const s = starSvg(i < n); if (!reduceMotion()) s.style.animation = `rise .35s ease-out ${i * 0.12}s both`; row.append(s); }
+  t.append(H('div', null, row, H('p', { text: m === 0 ? '실수 없이 썼어요!' : n === 2 ? '잘했어요!' : '끝까지 해냈어요!' })));
+  t.hidden = false;
+}
+function sessionDone() {
+  const sess = st.sess, before = sess.before;
+  const earned = sess.results.reduce((a, b) => a + (b || 0), 0), max = sess.items.length * 3;
+  const rating = earned / max >= 0.9 ? 3 : earned / max >= 0.6 ? 2 : 1;
+  const banners = [];
+  let nextUp = null;
+  if (sess.stage) {
+    const s = sess.stage, wasDone = stageDone(s);
+    store.stages[s.id] = Math.max(store.stages[s.id] || 0, rating);
+    const ch = s.ch;
+    if (!store.medals.includes(ch.id) && ch.stages.every(stageDone)) { store.medals.push(ch.id); banners.push(['medal', ch, `${ch.title} 메달을 받았어요!`]); }
+    const nx = STAGES[s.gi + 1];
+    if (nx) { nextUp = nx; if (!wasDone) banners.push(['em', '🔓', `다음 단계 ‘${nx.id} ${nx.name}’이 열렸어요!`]); }
+    else if (!wasDone) banners.push(['em', '🏆', '획순 여행을 모두 마쳤어요! 정말 대단해요!']);
+  }
+  const lvB = levelOf(before.total), lvA = levelOf(store.total);
+  if (lvA > lvB) banners.unshift(['em', '🎉', `레벨 업! 이제 ‘${LEVELS[lvA][1]}’이에요.`]);
+  const skB = Math.floor(before.total / STICKER_EVERY), skA = Math.floor(store.total / STICKER_EVERY);
+  const newSk = STICKERS.slice(skB, Math.min(skA, STICKERS.length));
+  if (newSk.length) banners.push(['em', newSk[newSk.length - 1], newSk.length > 1 ? `새 스티커 ${newSk.length}장을 받았어요! ${newSk.join(' ')}` : '새 스티커를 받았어요!']);
+  const dayA = todayCount();
+  if (before.day < store.goal && dayA >= store.goal) banners.push(['em', '⭐', `오늘 목표 ${store.goal}글자를 다 썼어요!`]);
+  save();
+  sfxWin(); confetti();
+
+  const win = $('#win'); win.innerHTML = '';
+  const title = sess.kind === 'test' ? `${sess.stage.name} 통과!` : sess.stage ? `${sess.stage.id} 단계 통과!` : sess.kind === 'review' ? '복습 끝!' : '다 썼어요!';
+  const big = H('div', { class: 'big-stars' });
+  for (let i = 0; i < 3; i++) { const s = starSvg(i < rating, i < rating ? 'on' : ''); s.style.animationDelay = `${i * 0.15}s`; big.append(s); }
+  const results = H('div', { class: 'results' });
+  sess.items.forEach((it, i) => results.append(H('div', { class: 'res' }, it.text, miniStars(sess.results[i] || 0))));
+  const bannerEls = banners.map(([kind, a, text]) => kind === 'medal'
+    ? H('div', { class: 'banner', style: `--c: var(--s${a.color})` }, H('span', { class: 'em medal-em', text: a.emblem }), text)
+    : H('div', { class: 'banner' }, H('span', { class: 'em', text: a }), text));
+  const again = H('button', { class: 'btn', type: 'button', text: '다시 하기', onclick: () => {
+    if (sess.kind === 'review' && !weakList().length) { leavePractice(); toast('복습할 글자를 모두 익혔어요!'); return; }
+    startSession(sess.stage ? stageSession(sess.stage) : sess.kind === 'review' ? reviewSession() : freeSession(sess.texts, sess.title), st.returnTo);
+  } });
+  const home = H('button', { class: 'btn', type: 'button', text: st.returnTo === 'free' ? '자유 연습' : '지도 보기', onclick: leavePractice });
+  const actions = H('div', { class: 'sheet-actions' }, again, home);
+  if (nextUp) actions.append(H('button', { class: 'btn primary', type: 'button', text: '다음 단계', onclick: () => startSession(stageSession(nextUp), 'home') }));
+  win.append(big, H('h2', { text: title }), H('div', { class: 'gain', text: `별 +${earned}` }), results, ...bannerEls, actions);
+  $('#winLayer').hidden = false;
+  setTimeout(() => (actions.lastChild).focus({ preventScroll: true }), 50);
+}
+function leavePractice() {
+  animToken++; st.animating = false; st.busy = false; st.sess = null;
+  hush();
+  $('#winLayer').hidden = true; $('#starToast').hidden = true;
+  if (st.returnTo === 'free') { show('free'); renderFree(); } else { show('home'); renderHome(); }
+}
+function confetti() {
+  if (reduceMotion()) return;
+  const cv = $('#confetti'), ctx = cv.getContext('2d');
+  if (!ctx) return;
+  const dpr = window.devicePixelRatio || 1, W = innerWidth, Hh = innerHeight;
+  cv.width = W * dpr; cv.height = Hh * dpr; cv.hidden = false;
+  const cs = getComputedStyle(document.documentElement);
+  const cols = [1, 2, 3, 4, 5, 6].map((i) => cs.getPropertyValue('--s' + i).trim() || '#f0a');
+  const P = Array.from({ length: 120 }, () => ({
+    x: W / 2 + (Math.random() - 0.5) * 140, y: Hh * 0.38, vx: (Math.random() - 0.5) * 12, vy: -Math.random() * 12 - 4,
+    r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3, w: 6 + Math.random() * 6, h: 9 + Math.random() * 8, c: pick(cols),
+  }));
+  const t0 = performance.now();
+  const f = (now) => {
+    const t = now - t0;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, Hh);
+    for (const p of P) {
+      p.vy += 0.33; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.globalAlpha = Math.max(0, 1 - t / 2200);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    }
+    if (t < 2200) requestAnimationFrame(f); else { ctx.clearRect(0, 0, W, Hh); cv.hidden = true; }
+  };
+  requestAnimationFrame(f);
+}
+
+/* ================= free practice ================= */
+const FREE_TABS = [['letters', '자음 · 모음'], ['table', '음절표'], ['builder', '글자 만들기'], ['words', '낱말'], ['sentences', '문장'], ['mine', '내 이름 · 직접 쓰기']];
+let freeTab = 'letters', themeIdx = 0;
+const builder = { cho: 'ㄱ', jung: 'ㅏ', jong: '' };
+function openFree() { show('free'); renderFree(); }
+function renderFree() {
+  syncStars();
+  const tabs = $('#freeTabs'); tabs.innerHTML = '';
+  FREE_TABS.forEach(([id, label]) => tabs.append(H('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === freeTab), text: label, onclick: () => { freeTab = id; renderFree(); } })));
+  const body = $('#freeBody'); body.innerHTML = '';
+  const go = (texts, title) => startSession(freeSession(texts, title), 'free');
+  const chipFor = (t, cls) => H('button', { class: 'chip' + (cls ? ' ' + cls : ''), type: 'button', onclick: () => go([t], `자유 연습 · ${t}`) }, H('span', { text: t }), dots(bestOf(t)));
+  const group = (title, list, cls, mixN) => {
+    const card = H('section', { class: 'card' });
+    card.append(H('div', { class: 'group-head' }, H('h3', { text: title }),
+      mixN ? H('button', { class: 'btn small primary', type: 'button', text: `섞어서 ${mixN}개`, onclick: () => go(shuffle(list).slice(0, mixN), `${title} 섞어서 ${mixN}개`) }) : null));
+    const chips = H('div', { class: 'chips' }); list.forEach((t) => chips.append(chipFor(t, cls))); card.append(chips);
+    return card;
+  };
+  if (freeTab === 'letters') {
+    body.append(group('자음 19자', CONS19, '', 5), group('모음 21자', VOW21, '', 5));
+  } else if (freeTab === 'table') {
+    const card = H('section', { class: 'card' });
+    const all = TABLE_C.flatMap((cc) => TABLE_V.map((v) => compose(cc, v, '')));
+    card.append(H('div', { class: 'group-head' }, H('h3', { text: '음절표 140자' }),
+      H('button', { class: 'btn small primary', type: 'button', text: '섞어서 5개', onclick: () => go(shuffle(all).slice(0, 5), '음절표 섞어서 5개') })));
+    const tbl = H('table', { class: 'syl-table' });
+    const hr = H('tr', null, H('th'));
+    TABLE_V.forEach((v) => hr.append(H('th', { text: v })));
+    tbl.append(hr);
+    TABLE_C.forEach((cc) => {
+      const tr = H('tr', null, H('th', { text: cc }));
+      TABLE_V.forEach((v) => { const ch = compose(cc, v, ''); tr.append(H('td', null, H('button', { type: 'button', class: bestOf(ch) ? 'has' : '', text: ch, 'aria-label': `${ch} 쓰기`, onclick: () => go([ch], `음절표 · ${ch}`) }))); });
+      tbl.append(tr);
+    });
+    card.append(H('div', { class: 'table-wrap' }, tbl));
+    body.append(card);
+  } else if (freeTab === 'builder') {
+    const card = H('section', { class: 'card builder' });
+    const ch = compose(builder.cho, builder.jung, builder.jong);
+    const pickRow = (title, list, field) => {
+      const chips = H('div', { class: 'chips' });
+      list.forEach((j) => chips.append(H('button', { class: 'chip' + (builder[field] === j ? ' sel' : ''), type: 'button', 'aria-pressed': String(builder[field] === j), text: j || '없음', onclick: () => { builder[field] = j; renderFree(); } })));
+      return H('div', null, H('h4', { text: title }), chips);
+    };
+    card.append(H('div', { class: 'builder-top' }, miniGlyph(ch, 'syllable', true),
+      H('div', null, H('h3', { class: 'display', style: 'margin:0;font-family:var(--font-display);font-weight:400;font-size:1.3rem', text: `‘${ch}’ 만들기` }),
+        H('p', { class: 'tip', text: '첫소리, 가운데소리, 받침을 골라 어떤 글자든 만들어 써 봐요.' }),
+        H('button', { class: 'btn primary', type: 'button', style: 'margin-top:8px', text: `‘${ch}’ 써 보기`, onclick: () => go([ch], `글자 만들기 · ${ch}`) }))),
+      pickRow('첫소리', CHO, 'cho'), pickRow('가운데소리', JUNG, 'jung'), pickRow('받침', JONG, 'jong'));
+    body.append(card);
+  } else if (freeTab === 'words') {
+    const tabs2 = H('div', { class: 'chips' });
+    THEMES.forEach(([name], i) => tabs2.append(H('button', { class: 'chip word' + (i === themeIdx ? ' sel' : ''), type: 'button', 'aria-pressed': String(i === themeIdx), text: name, onclick: () => { themeIdx = i; renderFree(); } })));
+    body.append(H('section', { class: 'card' }, H('div', { class: 'group-head' }, H('h3', { text: `낱말 ${WORD_COUNT}개 · 주제 고르기` })), tabs2));
+    const [name, list] = THEMES[themeIdx];
+    body.append(group(name, list, 'word', 4));
+  } else if (freeTab === 'sentences') {
+    body.append(group('짧은 문장', SENTENCES, 'sentence', 2));
+  } else {
+    const card = H('section', { class: 'card' });
+    const form = H('form', { class: 'name-form', autocomplete: 'off' },
+      H('label', { for: 'nameInput', class: 'sr', text: '이름이나 쓰고 싶은 말' }),
+      H('input', { id: 'nameInput', maxlength: '14', placeholder: '예: 김서윤', lang: 'ko' }),
+      H('button', { class: 'btn green', type: 'submit', text: '공책 만들기' }));
+    const err = H('p', { class: 'err', hidden: '' });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = $('#nameInput').value.trim().replace(/\s+/g, ' ');
+      if (!/^[가-힣 ]{1,12}$/.test(v) || !/[가-힣]/.test(v)) { err.textContent = '완성된 한글로 12글자까지 써 주세요. (예: 김서윤, 나는 일곱 살)'; err.hidden = false; return; }
+      if (!store.names.includes(v)) { store.names.push(v); save(); }
+      go([v], `내 이름 · ${v}`);
+    });
+    const list = H('div', { class: 'chips', style: 'margin-top:12px' });
+    store.names.forEach((nm, i) => list.append(H('span', { class: 'name-chip' },
+      H('button', { class: 'go', type: 'button', onclick: () => go([nm], `내 이름 · ${nm}`) }, nm, dots(bestOf(nm))),
+      H('button', { class: 'x', type: 'button', 'aria-label': `${nm} 지우기`, onclick: () => { store.names.splice(i, 1); save(); renderFree(); } }, '×'))));
+    card.append(H('div', { class: 'group-head' }, H('h3', { text: '이름이나 쓰고 싶은 말' })),
+      H('p', { class: 'tip', style: 'margin-bottom:10px', text: '아이 이름, 친구 이름, 짧은 말을 넣으면 그대로 획순 공책이 돼요.' }), form, err, list);
+    body.append(card);
+  }
+}
+function compose(cho, jung, jong) { return String.fromCharCode(0xAC00 + (CHO.indexOf(cho) * 21 + JUNG.indexOf(jung)) * 28 + JONG.indexOf(jong)); }
+
+/* ================= controls ================= */
+$('#freeBtn').addEventListener('click', openFree);
+$('#freeBack').addEventListener('click', () => { show('home'); renderHome(); });
+$('#backBtn').addEventListener('click', leavePractice);
+$('#watchBtn').addEventListener('click', replayWatch);
+$('#againBtn').addEventListener('click', () => {
+  if (!st.sess) return;
+  if (st.mode === 'watch') { animToken++; st.busy = false; (st.watchThen || startRound)(); return; }
+  if (!st.busy) { st.strokeIdx = 0; st.hint = false; st.missStreak = 0; renderUnit(); setMsg(roundMsg()); }
+});
+$('#sayBtn').addEventListener('click', () => { const item = curItem(); if (item) say(item.type === 'jamo' ? jamoName(item.text) : item.text); });
+function syncSound() {
+  $('#soundUse').setAttribute('href', store.muted ? '#i-mute' : '#i-sound');
+  $('#soundBtn').setAttribute('aria-label', store.muted ? '소리 켜기' : '소리 끄기');
+}
+$('#soundBtn').addEventListener('click', () => { store.muted = !store.muted; save(); syncSound(); if (store.muted) hush(); else audio(); });
+function syncSettings() {
+  document.querySelectorAll('#goalSeg button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.goal) === store.goal)));
+  $('#unlockAll').checked = !!store.unlockAll;
+}
+document.querySelectorAll('#goalSeg button').forEach((b) => b.addEventListener('click', () => { store.goal = Number(b.dataset.goal); save(); syncSettings(); renderHome(); }));
+$('#unlockAll').addEventListener('change', (e) => { store.unlockAll = e.target.checked; save(); renderHome(); });
+$('#resetBtn').addEventListener('click', () => { $('#resetConfirm').hidden = false; });
+$('#resetNo').addEventListener('click', () => { $('#resetConfirm').hidden = true; });
+$('#resetYes').addEventListener('click', () => {
+  Object.assign(store, { stars: {}, stages: {}, weak: {}, days: {}, medals: [], total: 0 });
+  save(); $('#resetConfirm').hidden = true; openChapter = null; renderHome();
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#sheetLayer').hidden) closeSheet(); });
+
+syncSound(); syncSettings(); renderHome();
+})();
+</script>
+</body>
+</html>
