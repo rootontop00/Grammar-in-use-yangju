@@ -364,7 +364,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
       <div class="parents-body">
         <h4>연습 순서</h4>
         <ol>
-          <li><b>보기</b> — 획이 하나씩 그려지는 것을 봐요. 숫자를 함께 세어 줘요.</li>
+          <li><b>보기</b> — 획이 하나씩 그려지는 것을 봐요. 아이와 함께 "하나, 둘, 셋" 숫자를 세어 주세요.</li>
           <li><b>따라 쓰기</b> — 반짝이는 점에서 시작해 화살표 방향으로 손가락(또는 펜)으로 그어요. 순서나 방향이 틀리면 바로 알려 줘요.</li>
           <li><b>혼자 쓰기</b> — 숫자와 화살표 없이 흐린 글씨 위에 써요. 실수 없이 끝내면 별 3개!</li>
         </ol>
@@ -808,30 +808,22 @@ function note(freq, start, dur, type = 'triangle', vol = 0.16) {
 }
 const PENTA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5, 1568, 1760, 2093];
 const sfxGood = (i) => { const k = Math.min(i, PENTA.length - 3); note(PENTA[k], 0, 0.25); note(PENTA[k + 2], 0.07, 0.3, 'sine', 0.09); };
-const sfxBad = () => { note(233, 0, 0.16, 'square', 0.05); note(196, 0.12, 0.22, 'square', 0.045); };
+const sfxBad = () => { note(330, 0, 0.18, 'triangle', 0.09); note(262, 0.13, 0.24, 'triangle', 0.08); };
 const sfxWin = () => { [0, 2, 4, 5, 7].forEach((k, j) => note(PENTA[k], j * 0.11, 0.32)); note(PENTA[9], 0.6, 0.7, 'sine', 0.12); };
 
-let koVoice = null;
-function pickVoice() {
-  try {
-    const vs = speechSynthesis.getVoices();
-    koVoice = vs.find((v) => /^ko/i.test(v.lang) && /Yuna|Google|SunHi|Heami|InJoon/i.test(v.name)) || vs.find((v) => /^ko/i.test(v.lang)) || null;
-  } catch (e) {}
-}
-if ('speechSynthesis' in window) {
-  pickVoice();
-  try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {}
-}
-function say(text, rate = 0.92) {
+/* The voice is only used right after a tap (letter name), never on top of sound effects:
+   starting speech while Web Audio is playing closes the app on some tablets. */
+function say(text) {
   if (store.muted || !('speechSynthesis' in window)) return;
   try {
-    speechSynthesis.cancel();
+    const ss = window.speechSynthesis;
+    if (ss.speaking || ss.pending) return;
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice; u.rate = rate; u.pitch = 1.1;
-    speechSynthesis.speak(u);
+    u.lang = 'ko-KR'; u.rate = 0.9;
+    ss.speak(u);
   } catch (e) {}
 }
-const COUNT = ['하나', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열', '열하나', '열둘', '열셋', '열넷', '열다섯', '열여섯', '열일곱', '열여덟', '열아홉', '스물'];
+function hush() { try { const ss = window.speechSynthesis; if (ss && (ss.speaking || ss.pending)) ss.cancel(); } catch (e) {} }
 
 /* ================= state ================= */
 const st = {
@@ -925,7 +917,7 @@ function openSet(si, ii) {
 }
 function goHome() {
   animToken++; st.animating = false;
-  try { speechSynthesis.cancel(); } catch (e) {}
+  hush();
   $('#celebrate').hidden = true;
   $('#practice').hidden = true; $('#home').hidden = false;
   renderHome(); window.scrollTo(0, 0);
@@ -1104,7 +1096,6 @@ async function playWatch() {
     if (my !== animToken) return;
     const s = u.strokes[i], c = colorOf(u, i);
     drawBadge(layers.badges, s, i, c, u.kind === 'jamo' ? 5 : 4.2, true);
-    if (i < COUNT.length) say(COUNT[i], 1.05);
     await animateStroke(s, c, u.w, layers.anim, my);
     await wait(260);
   }
@@ -1217,7 +1208,7 @@ board.addEventListener('pointermove', (e) => {
 function endDraw(e) {
   if (!drawing || e.pointerId !== drawing.id) return;
   const d = drawing; drawing = null;
-  handleStroke(d);
+  try { handleStroke(d); } catch (err) { d.el.remove(); st.busy = false; setMsg('선을 따라 천천히 다시 그어 볼까요?'); }
 }
 board.addEventListener('pointerup', endDraw);
 board.addEventListener('pointercancel', endDraw);
@@ -1243,21 +1234,20 @@ function handleStroke(d) {
   st.missStreak++;
   if (st.mode === 'test') st.mistakes++;
   const n = idx + 1, s = U.strokes[idx];
-  let text, voice;
+  let text;
   switch (res.type) {
-    case 'order': text = `순서가 달라요! ${n}번 획을 먼저 써요.`; voice = '순서가 달라요'; break;
+    case 'order': text = `순서가 달라요! ${n}번 획을 먼저 써요.`; break;
     case 'reverse':
-      if (s.loop) { text = '반대로 돌았어요. 위에서 시작해서 왼쪽으로 돌려요!'; voice = '반대로 돌았어요'; }
-      else { text = '방향이 반대예요. 화살표 쪽으로 그어요!'; voice = '방향이 반대예요'; }
+      if (s.loop) text = '반대로 돌았어요. 위에서 시작해서 왼쪽으로 돌려요!';
+      else text = '방향이 반대예요. 화살표 쪽으로 그어요!';
       break;
-    case 'toolong': text = '끝에서 멈추고 손을 떼요. 한 번에 이어 쓰지 않아요!'; voice = '끝에서 멈춰요'; break;
-    case 'short': text = '중간에 떼지 말고 끝까지 쭉 이어서 그어요.'; voice = '끝까지 이어서 그어요'; break;
-    case 'start': text = `${n}번 점에서 시작해요.`; voice = '점에서 시작해요'; break;
-    case 'again': text = '그 획은 벌써 썼어요! 다음 획을 찾아봐요.'; voice = '벌써 썼어요'; break;
-    default: text = '선을 따라 천천히 다시 그어 볼까요?'; voice = '다시 해 볼까요';
+    case 'toolong': text = '끝에서 멈추고 손을 떼요. 한 번에 이어 쓰지 않아요!'; break;
+    case 'short': text = '중간에 떼지 말고 끝까지 쭉 이어서 그어요.'; break;
+    case 'start': text = `${n}번 점에서 시작해요.`; break;
+    case 'again': text = '그 획은 벌써 썼어요! 다음 획을 찾아봐요.'; break;
+    default: text = '선을 따라 천천히 다시 그어 볼까요?';
   }
   setMsg(text, 'bad');
-  say(voice);
   if (st.mode === 'test' && !st.hint) { st.hint = true; showHint(); }
   if (st.mode === 'trace' && st.missStreak >= 2) demoCurrent();
 }
@@ -1288,7 +1278,6 @@ async function unitDone() {
     if (my !== animToken) return;
     st.unitIdx++; st.strokeIdx = 0; st.hint = false; st.busy = false;
     renderUnit();
-    say(next);
     if (st.mode === 'trace') setMsg('반짝이는 1번 점에서 시작해요.');
     else setMsg('어느 획부터 쓸까요?');
     return;
@@ -1307,7 +1296,6 @@ function itemDone() {
   renderStrip();
   sfxWin(); confetti();
   const title = pick(['참 잘했어요!', '최고예요!', '정말 멋져요!', '훌륭해요!']);
-  say(title);
   const stars = $('#celeStars'); stars.innerHTML = '';
   for (let i = 0; i < 3; i++) {
     const svg = S('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', class: i < earned ? 'on' : 'off', style: `animation-delay:${i * 0.15}s` });
@@ -1379,7 +1367,7 @@ function syncSound() {
 }
 $('#soundBtn').addEventListener('click', () => {
   store.muted = !store.muted; save(); syncSound();
-  if (store.muted) { try { speechSynthesis.cancel(); } catch (e) {} } else audio();
+  if (store.muted) hush(); else audio();
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !$('#celebrate').hidden) $('#celebrate').hidden = true;
